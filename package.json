@@ -1,0 +1,27 @@
+{
+  "name": "gui",
+  "version": "1.0.0",
+  "description": "simple js gui",
+  "main": "index.js",
+  "scripts": {
+    "dev": "parcel src/index.html",
+    "build": "parcel build src/index.html"
+  },
+  "parcelCleanPaths": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lucas-RS/gui.git"
+  },
+  "author": "Lucas RiedlShah",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Lucas-RS/gui/issues"
+  },
+  "homepage": "https://github.com/Lucas-RS/gui#readme",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-clean-easy": "^1.0.2"
+  }
+}
