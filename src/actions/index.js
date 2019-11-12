@@ -1,3 +1,3 @@
-export const addController = (controllerSettings) => {
-  return Object.assign({type: 'ADD_CONTROLLER'}, controllerSettings)
+export const addController = (key, controllerSettings) => {
+  return {type: 'ADD_CONTROLLER', key, controllerSettings}
 }
