@@ -1,3 +1,1 @@
-export const addController = (key, controllerSettings) => {
-  return {type: 'ADD_CONTROLLER', key, controllerSettings}
-}
+export * from './controller-actions'
