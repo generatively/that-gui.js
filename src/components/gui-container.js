@@ -1,13 +1,14 @@
-import { LitElement, html } from 'lit-element';
+import { LitElement, html } from 'lit-element'
 
 class GuiContainer extends LitElement {
-
   render(){
     return html`
       <div>
-        <p>A paragraph</p>
+        <p>Gui Container</p>
+        <slot></slot>
       </div>
-    `;
+    `
   }
 }
-customElements.define('gui-container', GuiContainer);
+
+customElements.define('gui-container', GuiContainer)
