@@ -3,9 +3,9 @@ import { LitElement, html, css } from 'lit-element'
 export class GuiController extends LitElement {
   
   static get properties() { return {
-    key: {type: String},
+    label: {type: String},
     path: {type: String},
-    type: {type: String},
+    controllerType: {type: String},
     value: {},
     min: {type: Number},
     max: {type: Number},
@@ -24,10 +24,11 @@ export class GuiController extends LitElement {
   }
 
   render() {
-    console.log(this.key)
     return html`
     <div>
-      <span title="${this.path}">${this.key}: ${this.value}</span>
+      <span title="${this.path}">${this.label}: ${this.value}</span>
+      <br /><span>${this.controllerType}</span>
+      min:<span>${this.min}</span>|step:<span>${this.step}</span>|max:<span>${this.max}</span>
       <slot></slot>
     </div>
     `

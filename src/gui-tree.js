@@ -5,7 +5,6 @@ import './components/gui-controller'
 
 class GuiTree {
   constructor(options) {
-    this.store = store
     this.prefixCharacter = options.prefixCharacter || "_"
     this.pathCharacter = options.pathCharacter || "."
     this.element = document.createElement("gui-container")
@@ -68,34 +67,39 @@ class GuiTree {
   }
 
   refreshControllers(startPointKey) {
-    this.unsubscribe()
-
-    const topControllerIndex = Array.prototype.indexOf.call(this.controllerElements[startPointKey].parentNode.children, this.controllerElements[startPointKey])
-    for (let key of Object.keys(store.getState().controllers).reverse()) {
-      if (key.includes(startPointKey)) { 
-        store.dispatch(removeController(key))
-        this.controllerElements[key].parentNode.removeChild(this.controllerElements[key])
-        delete this.controllerElements[key]
+    if (startPointKey.length > 0) {
+      const topControllerIndex = Array.prototype.indexOf.call(this.controllerElements[startPointKey].parentNode.children, this.controllerElements[startPointKey])
+      for (let key of Object.keys(store.getState().controllers).reverse()) {
+        if (key.includes(startPointKey)) { 
+          store.dispatch(removeController(key))
+          this.controllerElements[key].parentNode.removeChild(this.controllerElements[key])
+          delete this.controllerElements[key]
+        }
       }
+
+      const path = startPointKey.split(this.pathCharacter)
+      const key = path.pop()
+      let pathKey, parentNode
+      if (path.length > 0) {
+        pathKey = path.join(this.pathCharacter)
+        parentNode = this.controllerElements[pathKey]
+      } else {
+        parentNode = this.element
+      }
+
+      let controllersObject = this.objects
+      path.forEach(dir => {controllersObject = controllersObject[dir]})
+      
+      this.addController(key, controllersObject, pathKey)
+      parentNode.insertBefore(parentNode.lastChild, parentNode.children[topControllerIndex])
     }
-
-    const path = startPointKey.split(this.pathCharacter)
-    const key = path.pop()
-    const pathKey = path.join(this.pathCharacter)
-
-    let controllersObject = this.objects
-    path.forEach(dir => {controllersObject = controllersObject[dir]})
-    
-    this.addController(key, controllersObject, pathKey)
-    this.controllerElements[pathKey].insertBefore(this.controllerElements[pathKey].lastChild, this.controllerElements[pathKey].children[topControllerIndex])
   }
 
   updateObjects() {
     const state = store.getState()
-
     for (let pathKey in state.controllers) {
       const path = pathKey.split(this.pathCharacter)
-      let { value, ...controllerOptions } = state.controllers[pathKey]
+      let { value, label, ...controllerOptions } = state.controllers[pathKey]
       let object = this.objects
       for (let i = 0; i < path.length - 1; i++) {
         object = object[path[i]]
@@ -114,62 +118,65 @@ class GuiTree {
         elem.setAttribute("value", value)
       }
 
-      elem.setAttribute("key", key)
-      elem.setAttribute("path", pathKey)
+      elem.setAttribute("label", label || key)
+      elem.path = pathKey
 
       for (let key in controllerOptions) {
         elem.setAttribute(key, controllerOptions[key])
       }
 
       if (Object.keys(controllerOptions).length > 0) {
-        object[this.prefixCharacter + key] = controllerOptions
+        object[this.prefixCharacter + key] = {label, ...controllerOptions}
       }
     }
   }
 }
 
-window.settings = {
-  varA: [1,6,8],
-  varB: {
-    _value: 10000,
-    varC: 5000,
-    aaa: 1,
-    az: 12,
-    _az: {
-      max: 100
-    }
-  },
-  varD: 10,
-  _varD: {
-    min: 0,
-    max: 100,
-    step: 2
-  },
-  varE: {
-    _value: 5,
-    varF: 18
-  }
-}
-
-const secondObject = {
-  varG: 1,
-  _varG: {
-    label: "Variable G",
-    step: 0.01
-  },
-  varH: {
-    varI: -1
-  },
-  _varH: {
-    label: "okay dog"
-  }
-}
-
-const thirdObject = {
-  anotherVar: "this is really neat right?"
-}
-
 window.onload = () => {
+  const settings = {
+    _value: 120,
+    zzz: {x:{y:{b: 1}}},
+    varA: [1,6,8],
+    varB: {
+      _value: 10000,
+      varC: 5000,
+      aaa: 1,
+      az: 12,
+      _az: {
+        label: "hello",
+        max: 100
+      }
+    },
+    varD: 10,
+    _varD: {
+      min: 0,
+      max: 100,
+      step: 2
+    },
+    varE: {
+      _value: 5,
+      varF: 18
+    }
+  }
+  const secondObject = {
+    _value: 120,
+    varG: 1,
+    _varG: {
+      label: "Variable G",
+      controllerType: "range",
+      step: 0.01
+    },
+    varH: {
+      varI: -1
+    },
+    _varH: {
+      label: "okay dog"
+    }
+  }
+  const thirdObject = {
+    anotherVar: "this is really neat right?"
+  }
+
   window.gui = new GuiTree({
     parentID: "settings"
   })
@@ -178,7 +185,4 @@ window.onload = () => {
   gui.add({thirdObject})
   
   store.dispatch(updateController("settings.varB", {value: 20000}))
-
-  console.log(store.getState())
-  console.log(gui.objects)
 }
