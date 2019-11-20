@@ -1,6 +1,6 @@
 import { LitElement, html, css } from 'lit-element'
 
-export class GuiController extends LitElement {
+class GuiController extends LitElement {
   
   static get properties() { return {
     label: {type: String},

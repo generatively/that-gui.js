@@ -1,4 +1,4 @@
 import { createStore } from 'redux'
-import { guiTreeApp } from './reducers'
+import { rootReducer } from './reducers'
 
-export const store = createStore(guiTreeApp)
+export const store = createStore(rootReducer)

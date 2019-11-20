@@ -1,10 +1,12 @@
-import { addController, removeController, updateController } from './actions'
+import { addController, removeController, updateController, setup } from './actions'
 import { store } from './store'
 import './components/gui-container'
 import './components/gui-controller'
 
 class GuiTree {
   constructor(options) {
+    this.store = store
+    this.unsubscribe = store.subscribe(() => this.updateObjects())
     this.prefixCharacter = options.prefixCharacter || "_"
     this.pathCharacter = options.pathCharacter || "."
     this.element = document.createElement("gui-container")
@@ -13,10 +15,10 @@ class GuiTree {
     }
     this.controllerElements = {}
     this.objects = {}
-    this.unsubscribe = store.subscribe(() => this.updateObjects())
   }
 
   add(objects) {
+    store.dispatch(setup())
     for (let key in objects) {
       this.objects[key] = objects[key]
       this.addController(key, objects)
@@ -69,8 +71,8 @@ class GuiTree {
   refreshControllers(startPointKey) {
     if (startPointKey.length > 0) {
       const topControllerIndex = Array.prototype.indexOf.call(this.controllerElements[startPointKey].parentNode.children, this.controllerElements[startPointKey])
-      for (let key of Object.keys(store.getState().controllers).reverse()) {
-        if (key.includes(startPointKey)) { 
+      for (let key in store.getState().controllerReducer.controllers) {
+        if (key.includes(startPointKey)) {
           store.dispatch(removeController(key))
           this.controllerElements[key].parentNode.removeChild(this.controllerElements[key])
           delete this.controllerElements[key]
@@ -96,14 +98,16 @@ class GuiTree {
   }
 
   updateObjects() {
-    const state = store.getState()
-    for (let pathKey in state.controllers) {
+    const lastAction = store.getState().lastAction
+    if (!['SETUP', 'REMOVE_CONTROLLER'].includes(lastAction.type)) {
+      const controllers = store.getState().controllerReducer.controllers
+      const pathKey = lastAction.key
       const path = pathKey.split(this.pathCharacter)
-      let { value, label, ...controllerOptions } = state.controllers[pathKey]
       let object = this.objects
       for (let i = 0; i < path.length - 1; i++) {
         object = object[path[i]]
       }
+      let { value, label, ...controllerOptions } = controllers[pathKey]
       const key = path[path.length - 1]
       const elem = this.controllerElements[pathKey]
 
