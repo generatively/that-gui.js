@@ -10,6 +10,16 @@ class GuiContainer extends LitElement {
     x: {type: String}
   }}
 
+  render(){
+    return html`
+      <div>
+        <p>Gui Container</p>
+        <slot></slot>
+        ${true ? html`<this-button>refresh</this-button>` : ``}
+      </div>
+    `
+  }
+
   static get styles() {
     return css`
       :host {
@@ -21,16 +31,6 @@ class GuiContainer extends LitElement {
         height: calc(100% - 2 * var(--padding));
         overflow: auto;
       }
-    `
-  }
-
-  render(){
-    return html`
-      <div>
-        <p>Gui Container</p>
-        <slot></slot>
-        ${true ? html`<button>hey</button>` : ``}
-      </div>
     `
   }
 }

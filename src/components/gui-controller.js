@@ -12,17 +12,6 @@ class GuiController extends LitElement {
     step: {type: Number}
   }}
 
-  static get styles() {
-    return css`
-      div {
-        border: solid black;
-        border-width: 0 0 5px 5px;
-        padding-left: 10px;
-        margin-bottom: 10px;
-      }
-    `
-  }
-
   render() {
     return html`
     <div>
@@ -31,6 +20,17 @@ class GuiController extends LitElement {
       min:<span>${this.min}</span>|step:<span>${this.step}</span>|max:<span>${this.max}</span>
       <slot></slot>
     </div>
+    `
+  }
+
+  static get styles() {
+    return css`
+      div {
+        border: solid black;
+        border-width: 0 0 5px 5px;
+        padding-left: 10px;
+        margin-bottom: 10px;
+      }
     `
   }
 }

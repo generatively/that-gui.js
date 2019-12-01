@@ -1,7 +1,6 @@
 import { addController, removeController, updateController, setup } from './actions'
 import { store } from './store'
-import './components/gui-container'
-import './components/gui-controller'
+import './components'
 
 class GuiTree {
   constructor(options) {
