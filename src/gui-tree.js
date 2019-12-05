@@ -118,10 +118,11 @@ class GuiTree {
         } else {
           object[key] = value
         }
-        elem.setAttribute("value", value)
+        elem.value = value
+        if (!controllerOptions.controllerType) elem.controllerType = typeof value
       }
 
-      elem.setAttribute("label", label || key)
+      elem.label = label || key
       elem.path = pathKey
 
       for (let key in controllerOptions) {
@@ -140,6 +141,7 @@ window.onload = () => {
     _value: 120,
     zzz: {x:{y:{b: 1}}},
     varA: [1,6,8],
+    varLol: () => {alert()},
     varB: {
       _value: 10000,
       varC: 5000,

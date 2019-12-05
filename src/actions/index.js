@@ -1,5 +1,5 @@
-export const setup = () => {
-  return {type: 'SETUP'}
+export const setup = (mainStyle) => {
+  return {type: 'SETUP', mainStyle}
 }
 
 export const addController = (key, controllerSettings) => {

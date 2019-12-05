@@ -14,22 +14,51 @@ class GuiController extends LitElement {
 
   render() {
     return html`
-    <div>
-      <span title="${this.path}">${this.label}: ${this.value}</span>
-      <br /><span>${this.controllerType}</span>
-      min:<span>${this.min}</span>|step:<span>${this.step}</span>|max:<span>${this.max}</span>
-      <slot></slot>
-    </div>
+      <div class="container-main">
+        <div class="container-controller">
+          <span title="${this.path}">
+            ${this.label}: <slot name="form-component">${this.appendFormComponent()}</slot>
+          </span>
+          <!-- <br /><span>${this.controllerType}</span> -->
+        </div>
+        <slot></slot>
+      </div>
     `
+  }
+
+  appendFormComponent() {
+    switch (this.controllerType){
+      case 'function':
+        const button = document.createElement('this-button')
+        button.innerHTML = this.label
+        button.onclick = this.value
+        button.slot = "form-component"
+        this.appendChild(button)
+      case undefined:
+        return
+    }
   }
 
   static get styles() {
     return css`
-      div {
-        border: solid black;
-        border-width: 0 0 5px 5px;
-        padding-left: 10px;
-        margin-bottom: 10px;
+      :host {
+        font-family: Alata;
+        display: block;
+        padding-bottom: 5pt;
+      }
+
+      .container-main {
+        margin: 5pt 1pt 0 5pt;
+        padding: 0.01pt;
+        border-radius: 10pt;
+        box-shadow: 0 0 0 1pt #CCC;
+      }
+
+      .container-controller {
+        padding: 5pt;
+        height: 50pt;
+        border-radius: 10pt;
+        /* box-shadow: 0 2pt 2pt -1pt #CCC; */
       }
     `
   }

@@ -12,20 +12,17 @@ class GuiContainer extends LitElement {
 
   render(){
     return html`
-      <div>
-        <p>Gui Container</p>
-        <slot></slot>
-        ${true ? html`<this-button>refresh</this-button>` : ``}
-      </div>
+      <p>Gui Container</p>
+      <slot></slot>
+      <this-button>refresh</this-button>
     `
   }
 
   static get styles() {
     return css`
       :host {
+        display: block;
         --padding: 20pt;
-      }
-      div {
         padding: var(--padding);
         width: calc(100% - 2 * var(--padding));
         height: calc(100% - 2 * var(--padding));

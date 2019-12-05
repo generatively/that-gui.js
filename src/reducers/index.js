@@ -1,4 +1,5 @@
 import { combineReducers } from 'redux'
+import { css } from 'lit-element'
 
 export const controllerReducer = (state = {}, action) => {
   let newState = {...state}
@@ -8,9 +9,9 @@ export const controllerReducer = (state = {}, action) => {
       if (newState.controllers === undefined) {
         newState.controllers = {}
       }
-      if (newState.lastAction === undefined) {
-        newState.lastAction = {}
-      }
+      // if (newState.lastAction === undefined) {
+      //   newState.lastAction = {}
+      // }
       break
 
     case 'ADD_CONTROLLER':
