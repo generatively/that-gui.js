@@ -39,6 +39,17 @@ class GuiTree {
 
       this.controllerElements[pathKey] = controllerElement
 
+      // switch (this.controllerType){
+      //   case 'function':
+      //     const button = document.createElement('this-button')
+      //     button.innerHTML = this.label
+      //     button.onclick = this.value
+      //     button.slot = "form-component"
+      //     this.appendChild(button)
+      //   case undefined:
+      //     return
+      // }
+
       const object = parentObject[key]
 
       if (Array.isArray(object)) {
