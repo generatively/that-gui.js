@@ -12,6 +12,28 @@ class GuiController extends LitElement {
     // step: {type: Number}
   }}
 
+  static get styles() {
+    return css`
+      :host {
+        font-family: Alata;
+        display: block;
+        padding-bottom: 2pt;
+      }
+
+      .container-main {
+        margin: 5pt 2pt 0 5pt;
+        border-radius: 10pt;
+        box-shadow: 0 0 0 1pt #CCC;
+      }
+
+      .container-controller {
+        padding: 5pt;
+        height: 50pt;
+        border-radius: 10pt;
+      }
+    `
+  }
+
   render() {
     return html`
       <div class="container-main">
@@ -22,43 +44,6 @@ class GuiController extends LitElement {
         </div>
         <slot></slot>
       </div>
-    `
-  }
-
-  // appendFormComponent() {
-  //   switch (this.controllerType){
-  //     case 'function':
-  //       const button = document.createElement('this-button')
-  //       button.innerHTML = this.label
-  //       button.onclick = this.value
-  //       button.slot = "form-component"
-  //       this.appendChild(button)
-  //     case undefined:
-  //       return
-  //   }
-  // }
-
-  static get styles() {
-    return css`
-      :host {
-        font-family: Alata;
-        display: block;
-        padding-bottom: 5pt;
-      }
-
-      .container-main {
-        margin: 5pt 2pt 0 5pt;
-        padding: 0.01pt;
-        border-radius: 10pt;
-        box-shadow: 0 0 0 1pt #CCC;
-      }
-
-      .container-controller {
-        padding: 5pt;
-        height: 50pt;
-        border-radius: 10pt;
-        /* box-shadow: 0 2pt 2pt -1pt #CCC; */
-      }
     `
   }
 }
