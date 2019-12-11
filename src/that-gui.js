@@ -2,7 +2,7 @@ import { addController, removeController, updateController, setup } from './acti
 import { store } from './store'
 import './components'
 
-class GuiTree {
+class ThatGui {
   constructor(options) {
     this.store = store
     this.unsubscribe = store.subscribe(() => this.updateObjects())
@@ -10,7 +10,9 @@ class GuiTree {
     this.pathCharacter = options.pathCharacter || "."
     this.element = document.createElement("gui-container")
     if (options.parentID) {
-      document.getElementById(options.parentID).appendChild(this.element)
+      document.getElementById(options.parentID).append(this.element)
+    } else {
+      document.body.append(this.element)
     }
     this.controllerElements = {}
     this.objects = {}
@@ -39,17 +41,6 @@ class GuiTree {
 
       this.controllerElements[pathKey] = controllerElement
 
-      // switch (this.controllerType){
-      //   case 'function':
-      //     const button = document.createElement('this-button')
-      //     button.innerHTML = this.label
-      //     button.onclick = this.value
-      //     button.slot = "form-component"
-      //     this.appendChild(button)
-      //   case undefined:
-      //     return
-      // }
-
       const object = parentObject[key]
 
       if (Array.isArray(object)) {
@@ -73,7 +64,7 @@ class GuiTree {
           ...parentObject[this.prefixCharacter + key]
         }
       }
-
+      
       store.dispatch(addController(pathKey, newController))
     }
   }
@@ -114,14 +105,18 @@ class GuiTree {
       const pathKey = lastAction.key
       const path = pathKey.split(this.pathCharacter)
       let object = this.objects
+      let { value, label, ...controllerOptions } = controllers[pathKey]
+      const key = path[path.length - 1]
+
       for (let i = 0; i < path.length - 1; i++) {
         object = object[path[i]]
       }
-      let { value, label, ...controllerOptions } = controllers[pathKey]
-      const key = path[path.length - 1]
-      const elem = this.controllerElements[pathKey]
 
-      if (value || object[key][this.prefixCharacter + "value"]) {
+      if (Object.keys(controllerOptions).length > 0) {
+        object[this.prefixCharacter + key] = {label, ...controllerOptions}
+      }
+
+      if (value) { // || object[key][this.prefixCharacter + "value"]
         if (Array.isArray(object[key])) {
           object[key] = [...value]
         } else if (typeof object[key] === "object") {
@@ -129,20 +124,12 @@ class GuiTree {
         } else {
           object[key] = value
         }
-        elem.value = value
-        if (!controllerOptions.controllerType) elem.controllerType = typeof value
       }
 
-      elem.label = label || key
+      const elem = this.controllerElements[pathKey]
+      
       elem.path = pathKey
-
-      for (let key in controllerOptions) {
-        elem.setAttribute(key, controllerOptions[key])
-      }
-
-      if (Object.keys(controllerOptions).length > 0) {
-        object[this.prefixCharacter + key] = {label, ...controllerOptions}
-      }
+      elem.label = label || key
     }
   }
 }
@@ -156,7 +143,8 @@ window.onload = () => {
     varB: {
       _value: 10000,
       varC: 5000,
-      aaa: 1,
+      aaa: false,
+      bbb: true,
       az: 12,
       _az: {
         label: "hello",
@@ -166,7 +154,7 @@ window.onload = () => {
     varD: 10,
     _varD: {
       min: 0,
-      max: 100,
+      max: 10,
       step: 2
     },
     varE: {
@@ -183,7 +171,7 @@ window.onload = () => {
       step: 0.01
     },
     varH: {
-      varI: -1
+      varI: {x:{y:{b: 1}}}
     },
     _varH: {
       label: "okay dog"
@@ -193,12 +181,12 @@ window.onload = () => {
     anotherVar: "this is really neat right?"
   }
 
-  window.gui = new GuiTree({
+  window.gui = new ThatGui({
     parentID: "settings"
   })
   gui.add({settings})
   gui.add({secondObject})
   gui.add({thirdObject})
   
-  store.dispatch(updateController("settings.varB", {value: 20000}))
+  store.dispatch(updateController("settings.varB", {value: 25000}))
 }

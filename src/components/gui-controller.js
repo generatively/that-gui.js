@@ -1,12 +1,13 @@
 import { LitElement, html, css } from 'lit-element'
+import { store } from '../store'
 
 class GuiController extends LitElement {
   
   static get properties() { return {
     label: {type: String},
-    path: {type: String},
+    path: {type: String}
     // controllerType: {type: String},
-    // value: {},
+    // value
     // min: {type: Number},
     // max: {type: Number},
     // step: {type: Number}
@@ -17,34 +18,64 @@ class GuiController extends LitElement {
       :host {
         font-family: Alata;
         display: block;
-        padding-bottom: 2pt;
+        margin: 5pt 0 0 5pt;
+        border-left: 1pt solid #CCC;
       }
 
-      .container-main {
-        margin: 5pt 2pt 0 5pt;
-        border-radius: 10pt;
-        box-shadow: 0 0 0 1pt #CCC;
-      }
-
-      .container-controller {
+      div {
         padding: 5pt;
         height: 50pt;
-        border-radius: 10pt;
       }
     `
   }
 
   render() {
     return html`
-      <div class="container-main">
-        <div class="container-controller">
-          <span title="${this.path}">
-            ${this.label}: <slot name="form-component"></slot>
-          </span>
-        </div>
-        <slot></slot>
+      <div title="${this.path}">
+          ${this.label}: <slot name="form-component"></slot>
       </div>
+      <slot></slot>
     `
+  }
+
+  firstUpdated(changedProperties) {
+    this.appendFormComponent()
+  }
+
+  appendFormComponent() {
+    let { value, label, ...controllerOptions } = store.getState().controllerReducer.controllers[this.path]
+
+    if (value) {
+      let formElem = document.createElement('input')
+      switch (typeof value) {
+        case 'number':
+          formElem.type = "range"
+          formElem.min = controllerOptions.min 
+          formElem.max = controllerOptions.max 
+          formElem.step = controllerOptions.step 
+          formElem.value = value
+          break
+        case 'string':
+          formElem.value = value
+          break
+        case 'boolean':
+          formElem.type = "checkbox"
+          formElem.checked = value
+          break
+        case 'function':
+          formElem.type = "button"
+          formElem.innerHTML = label
+          formElem.onclick = value
+          break
+        case 'object':
+          if (Array.isArray(value)) {
+            formElem.value = value
+          }
+      }
+
+      formElem.slot = "form-component"
+      this.appendChild(formElem)
+    }
   }
 }
 
