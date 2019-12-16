@@ -1,6 +1,6 @@
 import { LitElement, html, css } from 'lit-element'
 
-class GuiContainer extends LitElement {
+class ThatContainer extends LitElement {
   constructor() {
     super()
     this.x = "50px"
@@ -32,4 +32,4 @@ class GuiContainer extends LitElement {
   }
 }
 
-customElements.define('gui-container', GuiContainer)
+customElements.define('that-container', ThatContainer)

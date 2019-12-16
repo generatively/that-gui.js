@@ -8,7 +8,7 @@ class ThatGui {
     this.unsubscribe = store.subscribe(() => this.updateObjects())
     this.prefixCharacter = options.prefixCharacter || "_"
     this.pathCharacter = options.pathCharacter || "."
-    this.element = document.createElement("gui-container")
+    this.element = document.createElement("that-container")
     if (options.parentID) {
       document.getElementById(options.parentID).append(this.element)
     } else {
@@ -28,8 +28,8 @@ class ThatGui {
   
   addController(key, parentObject, pathKey) {
     if (!key.startsWith(this.prefixCharacter)) {
-      const controllerElement = document.createElement("gui-controller")
-      let newController = {}
+      const object = parentObject[key]
+      const controllerElement = document.createElement("that-controller")
 
       if (pathKey != undefined) {
         this.controllerElements[pathKey].appendChild(controllerElement)
@@ -39,24 +39,34 @@ class ThatGui {
         pathKey = key
       }
 
+      controllerElement.path = pathKey
+      controllerElement.label = object.label || key
+
       this.controllerElements[pathKey] = controllerElement
 
-      const object = parentObject[key]
+      let newController = {}
+
+      let value
 
       if (Array.isArray(object)) {
-        newController.value = [...object]
+        value = [...object]
       } else if (typeof object === "object") {
         for (let childKey in object) {
           if (!childKey.startsWith(this.prefixCharacter)) {
             this.addController(childKey, object, pathKey)
           }
         }
-        if (object[this.prefixCharacter + "value"]) {
-          newController.value = object[this.prefixCharacter + "value"]
+        if (object[this.prefixCharacter + "value"] != undefined) {
+          value = object[this.prefixCharacter + "value"]
         }
       } else {
-        newController.value = object
+        value = object
       }
+
+      controllerElement.hasValue = value != undefined
+
+      newController.initialValue = value
+      newController.value = value
 
       if (parentObject[this.prefixCharacter + key] != undefined) {
         newController = {
@@ -116,7 +126,7 @@ class ThatGui {
         object[this.prefixCharacter + key] = {label, ...controllerOptions}
       }
 
-      if (value) { // || object[key][this.prefixCharacter + "value"]
+      if (value != undefined) { // || object[key][this.prefixCharacter + "value"]
         if (Array.isArray(object[key])) {
           object[key] = [...value]
         } else if (typeof object[key] === "object") {
@@ -126,10 +136,7 @@ class ThatGui {
         }
       }
 
-      const elem = this.controllerElements[pathKey]
-      
-      elem.path = pathKey
-      elem.label = label || key
+      this.controllerElements[pathKey].requestUpdate()
     }
   }
 }
@@ -139,7 +146,10 @@ window.onload = () => {
     _value: 120,
     zzz: {x:{y:{b: 1}}},
     varA: [1,6,8],
-    varLol: () => {alert()},
+    varLol: () => {
+      alert("hello")
+      console.log("heyhey")
+    },
     varB: {
       _value: 10000,
       varC: 5000,
