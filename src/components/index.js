@@ -1,4 +1,5 @@
 import './that-container'
 import './that-controller'
 import './that-slider'
+import './that-input'
 import './this-button'

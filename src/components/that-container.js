@@ -3,12 +3,7 @@ import { LitElement, html, css } from 'lit-element'
 class ThatContainer extends LitElement {
   constructor() {
     super()
-    this.x = "50px"
   }
-
-  static get properties ()  {return {
-    x: {type: String}
-  }}
 
   render(){
     return html`
@@ -21,8 +16,8 @@ class ThatContainer extends LitElement {
   static get styles() {
     return css`
       :host {
-        display: block;
         --padding: 20pt;
+        display: block;
         padding: var(--padding);
         width: calc(100% - 2 * var(--padding));
         height: calc(100% - 2 * var(--padding));
