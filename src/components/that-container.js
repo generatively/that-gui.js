@@ -5,11 +5,11 @@ class ThatContainer extends LitElement {
     super()
   }
 
-  render(){
+  render() {
     return html`
       <p>Gui Container</p>
       <slot></slot>
-      <this-button>refresh</this-button>
+      <that-button>refresh</that-button>
     `
   }
 
@@ -22,6 +22,23 @@ class ThatContainer extends LitElement {
         width: calc(100% - 2 * var(--padding));
         height: calc(100% - 2 * var(--padding));
         overflow: auto;
+        outline: 1pt solid #ddd;
+      }
+
+      :host::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      :host::-webkit-scrollbar-track {
+        background: #efefef;
+      }
+
+      :host::-webkit-scrollbar-thumb {
+        background: #aaa;
+      }
+
+      :host::-webkit-scrollbar-thumb:hover {
+        background: #555;
       }
     `
   }

@@ -1,8 +1,7 @@
 import { LitElement, html, css } from 'lit-element'
-// import { store } from '../store'
 import { mainStyle } from '../styles'
 
-class ThisButton extends LitElement {
+class ThatButton extends LitElement {
 
   render() {
     return html`
@@ -41,4 +40,4 @@ class ThisButton extends LitElement {
   }
 }
 
-customElements.define('this-button', ThisButton)
+customElements.define('that-button', ThatButton)

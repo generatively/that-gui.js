@@ -22,6 +22,7 @@ class ThatGui {
 
   addController(key, parentObject, pathKey) {
     if (!key.startsWith(this.prefixCharacter)) {
+      let value
       const object = parentObject[key]
       const controllerElement = document.createElement('that-controller')
 
@@ -32,19 +33,13 @@ class ThatGui {
         this.element.appendChild(controllerElement)
         pathKey = key
       }
-
+      
       this.controllerElements[pathKey] = controllerElement
 
-      controllerElement.parentObject = parentObject
-      controllerElement.path = pathKey
-      controllerElement.key = key
-      controllerElement.label = key
-
-      let value
-
-      if (Array.isArray(object)) {
-        value = [...object]
-      } else if (typeof object === 'object') {
+      // if (Array.isArray(object)) {
+      //   value = [...object]
+      // } else 
+      if (typeof object === 'object') {
         for (let childKey in object) {
           if (!childKey.startsWith(this.prefixCharacter)) {
             this.addController(childKey, object, pathKey)
@@ -60,7 +55,15 @@ class ThatGui {
       if (value != undefined) {
         controllerElement.initialValue = value
         controllerElement.value = value
+        controllerElement.type = typeof value
+      } else {
+        controllerElement.type = 'title'
       }
+
+      controllerElement.parentObject = parentObject
+      controllerElement.path = pathKey
+      controllerElement.key = key
+      controllerElement.label = key
 
       if (parentObject[this.prefixCharacter + key] != undefined) {
         for (const prop in parentObject[this.prefixCharacter + key]) {
