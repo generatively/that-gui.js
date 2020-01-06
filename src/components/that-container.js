@@ -7,18 +7,17 @@ class ThatContainer extends LitElement {
 
   render() {
     return html`
-      <p>Gui Container</p>
       <slot></slot>
-      <that-button>refresh</that-button>
     `
   }
 
   static get styles() {
     return css`
       :host {
-        --padding: 20pt;
+        --padding: 5pt;
         display: block;
         padding: var(--padding);
+        padding-top: 0;
         width: calc(100% - 2 * var(--padding));
         height: calc(100% - 2 * var(--padding));
         overflow: auto;

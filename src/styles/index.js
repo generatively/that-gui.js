@@ -4,9 +4,9 @@ import { css } from 'lit-element'
 export const mainStyle = css`
   :host{
     --font-family: Alata, Verdana, sans-serif;
-    --primary-color: hsl(175, 50%, 60%);
-    --secondary-color: hsl(190, 100%, 80%);
-    --tertiary-color: hsl(350, 50%, 60%);
-    --text-color: hsl(225, 30%, 20%);
+    --primary-color: #4c4cbe;
+    --secondary-color: #b6d6ff;
+    --tertiary-color: orange;
+    --text-color: #4c4cbe;
   }
 `

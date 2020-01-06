@@ -33,12 +33,12 @@ class ThatGui {
         this.element.appendChild(controllerElement)
         pathKey = key
       }
-      
+
       this.controllerElements[pathKey] = controllerElement
 
       // if (Array.isArray(object)) {
       //   value = [...object]
-      // } else 
+      // } else
       if (typeof object === 'object') {
         for (let childKey in object) {
           if (!childKey.startsWith(this.prefixCharacter)) {
@@ -109,11 +109,12 @@ window.onload = () => {
     zzz: { x: { y: { b: 1 } } },
     varA: [1, 6, 8],
     varLol: () => {
-      alert('hello')
-      console.log('heyhey')
+      console.log('lol')
     },
     varB: {
-      _value: 10000,
+      _value: () => {
+        console.log('b')
+      },
       varC: 5000,
       aaa: false,
       bbb: true,

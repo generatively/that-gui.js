@@ -14,27 +14,24 @@ class ThatButton extends LitElement {
       :host {
         cursor: pointer;
         user-select: none;
-        margin: 5pt;
         display: inline-block;
-        background: var(--primary-color);
+        border: 1pt solid var(--primary-color);
         color: var(--text-color);
-        padding: 12pt;
+        padding: 5pt;
         text-align: center;
         vertical-align: middle;
         font-size: 12pt;
         font-family: var(--font-family);
-        border-radius: 100vmax;
-        box-shadow: 0 0 3pt -2pt var(--primary-color), 0 0 2pt -1pt #0003;
-        transition: transform 0.2s, box-shadow 0.3s;
+        border-radius: 5pt;
+        transition: box-shadow 0.1s;
       }
       
       :host(:hover) {
-        box-shadow: 0 0 10pt -3pt var(--primary-color), 0 0 10pt -1pt #0003;
+        box-shadow: 0 0 4pt #555;
       }
 
       :host(:active) {
-        box-shadow: 0 0 10pt -1pt var(--primary-color), 0 0 10pt -1pt #0003;
-        background: white;
+        background: var(--secondary-color);
       }
     `]
   }

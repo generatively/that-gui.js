@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
 import { styleMap } from 'lit-html/directives/style-map'
+//replace SVGs with divs + animations
 import reset from '../images/reset.svg'
 import randomise from '../images/randomise.svg'
 import settings from '../images/settings.svg'
@@ -40,31 +41,40 @@ class ThatController extends LitElement {
       }
 
       .container {
-        margin: 10pt;
-        margin-bottom: 0;
-        padding-bottom: 5pt;
+        margin-top: 10pt;
         border: 1px solid #ddd;
         border-radius: 5pt;
+        position: relative;
       }
 
       .form-component-container {
-        padding: 15pt;
+        padding: 15pt 0;
       }
 
       .controller-options {
         float: right;
+      }
+
+      .minimise-button {
+        cursor: pointer;
+        color: blue;
       }
     `
   }
 
   render() {
     return html`
-      <div class=${classMap({ container: true })} style=${styleMap({ backgroundColor: this.color })}>
-        <div title="${this.path}" class=${classMap({ 'form-component-container': true })}>
+      <div
+        class=${classMap({ container: true })}
+        style=${styleMap({ backgroundColor: this.color, 
+          padding: this.minimised ? '10pt' : '10pt 5pt 5pt 10pt' 
+        })}
+      >
+        <div title="${this.path}" class=${classMap({ 'form-component-container': this.type != 'title' })}>
           ${this.hasChildNodes()
             ? html`
                 <span
-                  style=${styleMap({ cursor: 'pointer', color: 'blue' })}
+                  class=${classMap({ 'minimise-button': true })}
                   @click=${() => {
                     this.minimised = !this.minimised
                   }}
@@ -72,17 +82,18 @@ class ThatController extends LitElement {
                   ${this.minimised ? '🡣' : '🡡'}
                 </span>
               `
-            : ``}
-          ${this.label}: ${this.appendFormComponent()}
+            : ''}
+          ${this.appendFormComponent()}
           <div class=${classMap({ 'controller-options': true })}>
-            ${this.actions.map(action => html`
-                  <img
-                    src="${action[1]}"
-                    style=${styleMap({ cursor: 'pointer', width: '1em', height: '1em' })}
-                    @click=${action[0]}
-                  />
-                `)
-            }
+            ${this.actions.map(
+              action => html`
+                <img
+                  src="${action[1]}"
+                  style=${styleMap({ cursor: 'pointer', width: '1em', height: '1em' })}
+                  @click=${action[0]}
+                />
+              `,
+            )}
           </div>
         </div>
         <div style=${styleMap({ display: this.minimised ? 'none' : 'initial' })}>
@@ -93,12 +104,27 @@ class ThatController extends LitElement {
   }
 
   firstUpdated(changedProperties) {
-    if (changedProperties.has('value')) {
+    if (changedProperties.has('value') && this.type != 'function') {
       this.actions = [
-        ...this.actions, 
-        [() => {this.updateValue(this.initialValue)}, reset], //move reset and randomise to that-gui.js
-        [() => {this.updateValue(this.randomise())}, randomise],
-        [() => {console.log(this.value)}, settings],
+        ...this.actions,
+        [
+          () => {
+            this.updateValue(this.initialValue)
+          },
+          reset,
+        ],
+        [
+          () => {
+            this.updateValue(this.randomise())
+          },
+          randomise,
+        ],
+        [
+          () => {
+            console.log(this.value)
+          },
+          settings,
+        ],
       ]
     }
   }
@@ -107,6 +133,7 @@ class ThatController extends LitElement {
     switch (this.type) {
       case 'number':
         return html`
+          ${this.label}:
           <input
             type="range"
             min=${this.min || 0}
@@ -122,6 +149,7 @@ class ThatController extends LitElement {
 
       case 'string':
         return html`
+          ${this.label}:
           <input
             .value=${this.value}
             @change=${event => {
@@ -132,6 +160,7 @@ class ThatController extends LitElement {
 
       case 'boolean':
         return html`
+          ${this.label}:
           <input
             type="checkbox"
             ?checked=${this.value}
@@ -141,7 +170,7 @@ class ThatController extends LitElement {
           />
         `
 
-      case 'function' || 'button':
+      case 'function':
         return html`
           <that-button @click="${this.value}">${this.label}</that-button>
         `
@@ -149,6 +178,7 @@ class ThatController extends LitElement {
       case 'object':
         if (Array.isArray(this.value)) {
           return html`
+            ${this.label}:
             <input
               .value=${this.value.toString()}
               @change=${event => {
@@ -159,7 +189,7 @@ class ThatController extends LitElement {
         }
 
       case 'title':
-        return
+        return this.label
 
       default:
         return html`
