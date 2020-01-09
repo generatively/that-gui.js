@@ -1,4 +1,5 @@
 import './components'
+import reset from './images/reset.svg'
 
 class ThatGui {
   constructor(options) {
@@ -106,10 +107,26 @@ class ThatGui {
 window.onload = () => {
   const settings = {
     _value: 120,
-    zzz: { x: { y: { b: 1 } } },
     varA: [1, 6, 8],
     varLol: () => {
       console.log('lol')
+    },
+    _varLol: {
+      label: 'BUTTON',
+      type: 'function',
+    },
+    varHi: () => {
+      console.log('hi')
+    },
+    _varHi: {
+      type: 'function outline !fill !elevate',
+      icon: reset,
+    },
+    bbb: () => {
+      console.log('bbb')
+    },
+    _bbb: {
+      type: 'function !fill !elevate',
     },
     varB: {
       _value: () => {
@@ -135,6 +152,7 @@ window.onload = () => {
       _value: 5,
       varF: 18,
     },
+    zzz: { x: { y: { b: 1 } } },
   }
   const secondObject = {
     _value: 120,

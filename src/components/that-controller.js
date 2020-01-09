@@ -1,6 +1,7 @@
-import { LitElement, html, css } from 'lit-element'
+import { LitElement, html, css, unsafeCSS } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
 import { styleMap } from 'lit-html/directives/style-map'
+import { mainStyle } from '../styles'
 //replace SVGs with divs + animations
 import reset from '../images/reset.svg'
 import randomise from '../images/randomise.svg'
@@ -30,6 +31,7 @@ class ThatController extends LitElement {
       min: { type: Number },
       max: { type: Number },
       step: { type: Number },
+      icon: { type: String },
     }
   }
 
@@ -41,23 +43,45 @@ class ThatController extends LitElement {
       }
 
       .container {
-        margin-top: 10pt;
-        border: 1px solid #ddd;
-        border-radius: 5pt;
+        margin-top: 20px;
+        padding: 20px;
         position: relative;
+        background: ${unsafeCSS(mainStyle.surface)};
+        color: ${unsafeCSS(mainStyle.onSurface)};
+        border-radius: 10px;
+        transition: box-shadow 0.15s;
+      }
+
+      .container:hover {
+        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+      }
+
+      .container--has-children {
+        border: 1px solid ${unsafeCSS(mainStyle.onSurface)}1f;
+      }
+
+      .container--elevate {
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+      }
+
+      .container--elevate:hover {
+        box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 3px 3px -2px rgba(0, 0, 0, 0.12), 0 1px 8px 0 rgba(0, 0, 0, 0.2);
       }
 
       .form-component-container {
-        padding: 15pt 0;
+        margin: 5px 0;
       }
 
       .controller-options {
+        display: none; /* add this back at some point */
         float: right;
       }
 
       .minimise-button {
         cursor: pointer;
-        color: blue;
+        user-select: none;
+        float: left;
+        margin-right: 10px;
       }
     `
   }
@@ -65,9 +89,10 @@ class ThatController extends LitElement {
   render() {
     return html`
       <div
-        class=${classMap({ container: true })}
-        style=${styleMap({ backgroundColor: this.color, 
-          padding: this.minimised ? '10pt' : '10pt 5pt 5pt 10pt' 
+        class=${classMap({
+          container: true,
+          'container--elevate': !this.minimised && this.hasChildNodes(),
+          'container--has-children': this.hasChildNodes(),
         })}
       >
         <div title="${this.path}" class=${classMap({ 'form-component-container': this.type != 'title' })}>
@@ -104,7 +129,7 @@ class ThatController extends LitElement {
   }
 
   firstUpdated(changedProperties) {
-    if (changedProperties.has('value') && this.type != 'function') {
+    if (changedProperties.has('value') && typeof this.value != 'function') {
       this.actions = [
         ...this.actions,
         [
@@ -130,7 +155,8 @@ class ThatController extends LitElement {
   }
 
   appendFormComponent() {
-    switch (this.type) {
+    const type = this.type.split(' ')
+    switch (type[0]) {
       case 'number':
         return html`
           ${this.label}:
@@ -171,8 +197,11 @@ class ThatController extends LitElement {
         `
 
       case 'function':
+        type.shift()
         return html`
-          <that-button @click="${this.value}">${this.label}</that-button>
+          <div style=${styleMap({ textAlign: 'center' })}>
+            <that-button @click=${this.value} .icon=${this.icon} .type=${type}>${this.label}</that-button>
+          </div>
         `
 
       case 'object':

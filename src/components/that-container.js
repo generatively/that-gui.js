@@ -5,27 +5,22 @@ class ThatContainer extends LitElement {
     super()
   }
 
-  render() {
-    return html`
-      <slot></slot>
-    `
-  }
-
   static get styles() {
     return css`
       :host {
-        --padding: 5pt;
+        --padding: 10px;
         display: block;
         padding: var(--padding);
-        padding-top: 0;
         width: calc(100% - 2 * var(--padding));
         height: calc(100% - 2 * var(--padding));
         overflow: auto;
-        outline: 1pt solid #ddd;
+        outline: 1px solid #ddd;
+        box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12),
+          0 5px 5px -3px rgba(0, 0, 0, 0.2);
       }
 
       :host::-webkit-scrollbar {
-        width: 10px;
+        width: 5px;
       }
 
       :host::-webkit-scrollbar-track {
@@ -39,6 +34,12 @@ class ThatContainer extends LitElement {
       :host::-webkit-scrollbar-thumb:hover {
         background: #555;
       }
+    `
+  }
+
+  render() {
+    return html`
+      <slot></slot>
     `
   }
 }

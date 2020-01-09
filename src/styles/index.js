@@ -1,12 +1,18 @@
 import './style.css'
 import { css } from 'lit-element'
 
-export const mainStyle = css`
-  :host{
-    --font-family: Alata, Verdana, sans-serif;
-    --primary-color: #4c4cbe;
-    --secondary-color: #b6d6ff;
-    --tertiary-color: orange;
-    --text-color: #4c4cbe;
-  }
-`
+export const mainStyle = {
+  fontFamily: 'Alata, Verdana, sans-serif',
+  primary: '#6200EE',
+  primaryVariant: '#3700B3',
+  secondary: '#03DAC6',
+  secondaryVariant: '#018786',
+  background: '#FFFFFF',
+  surface: '#FFFFFF',
+  error: '#B00020',
+  onPrimary: '#FFFFFF',
+  onSecond: '#000000',
+  onBackground: '#000000',
+  onSurface: '#000000',
+  onError: '#FFFFFF',
+}
