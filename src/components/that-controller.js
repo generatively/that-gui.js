@@ -10,7 +10,7 @@ import settings from '../images/settings.svg'
 class ThatController extends LitElement {
   constructor() {
     super()
-    this.minimised = false
+    this.minimise = false
     this.actions = []
   }
 
@@ -24,7 +24,7 @@ class ThatController extends LitElement {
       type: { type: String },
       tags: { type: Array },
       actions: { type: Array },
-      minimised: { type: Boolean },
+      minimise: { type: Boolean },
       color: { type: String },
       value: {},
       initialValue: {},
@@ -32,28 +32,27 @@ class ThatController extends LitElement {
       max: { type: Number },
       step: { type: Number },
       icon: { type: String },
+      options: { type: Array }
     }
   }
 
   static get styles() {
     return css`
       :host {
-        font-family: Alata;
         display: block;
       }
 
       .container {
-        margin-top: 20px;
-        padding: 20px;
+        font-family: Alata;
+        display: block;
+        margin-top: 15px;
+        padding: 10px;
         position: relative;
         background: ${unsafeCSS(mainStyle.surface)};
         color: ${unsafeCSS(mainStyle.onSurface)};
-        border-radius: 10px;
-        transition: box-shadow 0.15s;
-      }
-
-      .container:hover {
-        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        transition: box-shadow 0.2s;
+        transition-delay: 0.1s;
       }
 
       .container--has-children {
@@ -62,14 +61,18 @@ class ThatController extends LitElement {
 
       .container--elevate {
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+        transition-delay: 0s;
       }
 
       .container--elevate:hover {
         box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 3px 3px -2px rgba(0, 0, 0, 0.12), 0 1px 8px 0 rgba(0, 0, 0, 0.2);
       }
 
-      .form-component-container {
-        margin: 5px 0;
+      .minimise-button {
+        cursor: pointer;
+        user-select: none;
+        float: left;
+        margin: 0 10px 0 5px;
       }
 
       .controller-options {
@@ -77,11 +80,8 @@ class ThatController extends LitElement {
         float: right;
       }
 
-      .minimise-button {
-        cursor: pointer;
-        user-select: none;
-        float: left;
-        margin-right: 10px;
+      .children-container--minimise {
+        display: none;
       }
     `
   }
@@ -91,24 +91,24 @@ class ThatController extends LitElement {
       <div
         class=${classMap({
           container: true,
-          'container--elevate': !this.minimised && this.hasChildNodes(),
+          'container--elevate': !this.minimise && this.hasChildNodes(),
           'container--has-children': this.hasChildNodes(),
         })}
       >
-        <div title="${this.path}" class=${classMap({ 'form-component-container': this.type != 'title' })}>
+        <div title="${this.path}" class=${classMap({ 'form-container': this.type != 'title' })}>
           ${this.hasChildNodes()
             ? html`
                 <span
                   class=${classMap({ 'minimise-button': true })}
                   @click=${() => {
-                    this.minimised = !this.minimised
+                    this.minimise = !this.minimise
                   }}
                 >
-                  ${this.minimised ? '🡣' : '🡡'}
+                  ${this.minimise ? '🡣' : '🡡'}
                 </span>
               `
             : ''}
-          ${this.appendFormComponent()}
+          ${this.appendForm()}
           <div class=${classMap({ 'controller-options': true })}>
             ${this.actions.map(
               action => html`
@@ -121,7 +121,7 @@ class ThatController extends LitElement {
             )}
           </div>
         </div>
-        <div style=${styleMap({ display: this.minimised ? 'none' : 'initial' })}>
+        <div class=${classMap({ 'children-container': true, 'children-container--minimise': this.minimise })}>
           <slot></slot>
         </div>
       </div>
@@ -154,7 +154,7 @@ class ThatController extends LitElement {
     }
   }
 
-  appendFormComponent() {
+  appendForm() {
     const type = this.type.split(' ')
     switch (type[0]) {
       case 'number':
@@ -163,8 +163,8 @@ class ThatController extends LitElement {
           <input
             type="range"
             min=${this.min || 0}
-            max=${this.max || this.initialValue > 1 ? Math.pow(10, this.initialValue.toString().length) : 1}
-            step=${this.step || this.initialValue > 1 ? 1 : 0.001}
+            max=${this.max || (this.initialValue > 1 ? Math.pow(10, this.initialValue.toString().length) : 1)}
+            step=${this.step || (this.initialValue > 1 ? 1 : 0.001)}
             .value=${this.value}
             @change=${event => {
               this.updateValue(Number(event.srcElement.value))
@@ -179,7 +179,7 @@ class ThatController extends LitElement {
           <input
             .value=${this.value}
             @change=${event => {
-              console.log(event)
+              this.updateValue(event.srcElement.value)
             }}
           />
         `
@@ -191,7 +191,7 @@ class ThatController extends LitElement {
             type="checkbox"
             ?checked=${this.value}
             @change=${event => {
-              console.log(event)
+              this.updateValue(event.srcElement.checked)
             }}
           />
         `
@@ -232,7 +232,7 @@ class ThatController extends LitElement {
     if (this.path.split('.').length > 1) {
       this.parentObject[this.key] = newValue
     } else {
-      this.parentObject[this.key]._value = newValue
+      this.parentObject[this.key].__value = newValue
     }
   }
 }

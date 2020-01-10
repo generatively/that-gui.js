@@ -81,57 +81,6 @@ class ThatButton extends LitElement {
           0 5px 5px -3px ${unsafeCSS(mainStyle.primary)}33; */
       }
 
-      /* .container--fill {
-        background: ${unsafeCSS(mainStyle.primary)};
-        color: ${unsafeCSS(mainStyle.onPrimary)};
-        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
-      }
-
-      .container--fill:hover {
-        color: ${unsafeCSS(mainStyle.onPrimary)};
-        box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12),
-          0 5px 5px -3px rgba(0, 0, 0, 0.2);
-      }
-
-      .container--fill:active {
-        background: ${unsafeCSS(mainStyle.primaryVariant)};
-      }
-
-      .container--surface {
-        background: ${unsafeCSS(mainStyle.surface)};
-        color: ${unsafeCSS(mainStyle.primary)};
-        box-shadow: 0 2px 2px 0 ${unsafeCSS(mainStyle.primary)}24, 0 3px 1px -2px ${unsafeCSS(mainStyle.primary)}1f,
-          0 1px 5px 0 ${unsafeCSS(mainStyle.primary)}33;
-      }
-
-      .container--surface:hover {
-        box-shadow: 0 8px 10px 1px ${unsafeCSS(mainStyle.primary)}24, 0 3px 14px 2px ${unsafeCSS(mainStyle.primary)}1f,
-          0 5px 5px -3px ${unsafeCSS(mainStyle.primary)}33;
-      }
-
-      .container--surface:active {
-        background: ${unsafeCSS(mainStyle.primary)}1f;
-      }
-
-      .container--outlined {
-        background: ${unsafeCSS(mainStyle.surface)};
-        border: 1pt solid ${unsafeCSS(mainStyle.primary)};
-      }
-
-      .container--outlined:hover {
-        background: ${unsafeCSS(mainStyle.primary)}1f;
-      }
-
-      .container--outlined:active {
-        background: ${unsafeCSS(mainStyle.primaryVariant)}3e;
-      }
-
-      .container--text {
-        background: none;
-        color: ${unsafeCSS(mainStyle.primary)};
-        padding: 0 8px;
-      } */
-
       .container--has-icon {
         padding: 0 16px 0 14px;
       }

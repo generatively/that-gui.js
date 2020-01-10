@@ -3,7 +3,6 @@ import reset from './images/reset.svg'
 
 class ThatGui {
   constructor(options) {
-    this.prefixCharacter = options.prefixCharacter || '_'
     this.element = document.createElement('that-container')
     if (options.parentID) {
       document.getElementById(options.parentID).append(this.element)
@@ -22,7 +21,7 @@ class ThatGui {
   }
 
   addController(key, parentObject, pathKey) {
-    if (!key.startsWith(this.prefixCharacter)) {
+    if (!key.startsWith('_')) {
       let value
       const object = parentObject[key]
       const controllerElement = document.createElement('that-controller')
@@ -42,12 +41,12 @@ class ThatGui {
       // } else
       if (typeof object === 'object') {
         for (let childKey in object) {
-          if (!childKey.startsWith(this.prefixCharacter)) {
+          if (!childKey.startsWith('_')) {
             this.addController(childKey, object, pathKey)
           }
         }
-        if (object[this.prefixCharacter + 'value'] != undefined) {
-          value = object[this.prefixCharacter + 'value']
+        if (object['__value'] != undefined) {
+          value = object['__value']
         }
       } else {
         value = object
@@ -66,9 +65,15 @@ class ThatGui {
       controllerElement.key = key
       controllerElement.label = key
 
-      if (parentObject[this.prefixCharacter + key] != undefined) {
-        for (const prop in parentObject[this.prefixCharacter + key]) {
-          controllerElement[prop] = parentObject[this.prefixCharacter + key][prop]
+      if (parentObject.__all != undefined) {
+        for (const prop in parentObject.__all) {
+          controllerElement[prop] = parentObject.__all[prop]
+        }
+      }
+
+      if (parentObject['_' + key] != undefined) {
+        for (const prop in parentObject['_' + key]) {
+          controllerElement[prop] = parentObject['_' + key][prop]
         }
       }
     }
@@ -106,7 +111,110 @@ class ThatGui {
 
 window.onload = () => {
   const settings = {
-    _value: 120,
+    __value: 20,
+    number: {
+      small: 0.5,
+      larger: 4263,
+      limitted: -128.989999,
+      _limitted: {
+        min: -256,
+        max: 512,
+        step: 0.000001,
+      },
+      range: [0.5, 23],
+      _range: {
+        min: 0,
+        max: 100,
+        step: 0.02
+      },
+      array: [0, 0.5, 1, 10, 100, 1000],
+      _array: {
+        minimise: true,
+      },
+    },
+    string: {
+      string: 'hello world',
+      array: ['resistance', 'is', 'futile'],
+      _array: {
+        minimise: true,
+      },
+    },
+    boolean: {
+      checked: true,
+      unchecked: false,
+      switchOn: true,
+      switchOff: false,
+      array: [true, true, false, true, true, false, false, true],
+      _array: { minimise: true },
+    },
+    multiChoice: {
+      dropdown: 'Chino',
+      _dropdown: { options: ['The', 'Chino', 'Short'] },
+      dropdownArray: ['The', 'they', 'they'],
+      _dropdownArray: {
+        options: [
+          ['The', 'Chino', 'Short'],
+          ['are', 'they', 'good'],
+          ['or', "aren't", 'they'],
+        ],
+      },
+      tabs: 'The',
+      _tabs: { options: ['The', 'Chino', 'Short'] },
+      radiobuttons: 'Short',
+      _radiobuttons: { options: ['The', 'Chino', 'Short'] },
+      __all: { minimise: true },
+    },
+    color: {
+      hex: '#FFFFFF',
+      rgb: [255, 0, 1],
+      hsl: [255, 0, 100],
+      newLimits: [0.2, 0.6, 0.1],
+      _newLimits: {
+        min: 0,
+        max: 1,
+        step: 0.1,
+      },
+      swatch: '#0f0f0f',
+      _swatch: {
+        options: ['#123456', '#aef30c', '#235192'],
+      },
+      colorFromGradient: '#aef30c',
+      _colorFromGradient: {
+        options: ['#123456', '#aef30c', '#235192'],
+      },
+      gradient: [['#123456', 0], ['#aef30c', 0.3], '#283ace', ['#235192', 1]],
+    },
+    custom: {
+      0: 0
+      //support custom ones in here
+    },
+    __all: { minimise: true },
+  }
+  const secondObject = {
+    __value: 120,
+    zzz: {
+      x: { y: { b: 1, c: 20 } },
+      c: { y: { b: 1, z: 5 } },
+    },
+    varG: 1,
+    _varG: {
+      label: 'Variable G',
+      controllerType: 'range',
+      step: 0.01,
+    },
+    varH: {
+      varI: { x: { y: { b: 1 } } },
+    },
+    _varH: {
+      label: 'okay dog',
+    },
+  }
+  const thirdObject = {
+    __value: 'hello',
+    zzz: {
+      x: { y: { b: 1, c: 20 } },
+      c: { y: { b: 1, z: 5 } },
+    },
     varA: [1, 6, 8],
     varLol: () => {
       console.log('lol')
@@ -129,7 +237,7 @@ window.onload = () => {
       type: 'function !fill !elevate',
     },
     varB: {
-      _value: () => {
+      __value: () => {
         console.log('b')
       },
       varC: 5000,
@@ -149,34 +257,14 @@ window.onload = () => {
       step: 2,
     },
     varE: {
-      _value: 5,
+      __value: 5,
       varF: 18,
     },
-    zzz: { x: { y: { b: 1 } } },
-  }
-  const secondObject = {
-    _value: 120,
-    varG: 1,
-    _varG: {
-      label: 'Variable G',
-      controllerType: 'range',
-      step: 0.01,
-    },
-    varH: {
-      varI: { x: { y: { b: 1 } } },
-    },
-    _varH: {
-      label: 'okay dog',
-    },
-  }
-  const thirdObject = {
-    anotherVar: 'this is really neat right?',
   }
 
   window.gui = new ThatGui({
     parentID: 'settings',
   })
   gui.add({ settings })
-  gui.add({ secondObject })
-  gui.add({ thirdObject })
+  gui.add({ secondObject, thirdObject })
 }
