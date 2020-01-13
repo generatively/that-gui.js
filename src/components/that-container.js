@@ -20,6 +20,7 @@ class ThatContainer extends LitElement {
 
       :host::-webkit-scrollbar {
         width: 10px;
+        height: 10px;
       }
 
       :host::-webkit-scrollbar-track {

@@ -2,7 +2,7 @@ import './style.css'
 import { css } from 'lit-element'
 
 export const mainStyle = {
-  fontFamily: 'Alata, Verdana, sans-serif',
+  fontFamily: 'Roboto',
   primary: '#6200EE',
   primaryVariant: '#3700B3',
   secondary: '#03DAC6',

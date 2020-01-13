@@ -5,8 +5,6 @@ import { mainStyle } from '../styles'
 class ThatButton extends LitElement {
   constructor() {
     super()
-    this.fill = true
-    this.elevate = true
   }
 
   static get properties() {
@@ -17,62 +15,67 @@ class ThatButton extends LitElement {
       outline: { type: Boolean },
       elevate: { type: Boolean },
       shaped: { type: Boolean },
+      disabled: { type: Boolean },
     }
   }
 
   static get styles() {
     return css`
-      .container {
-        background: ${unsafeCSS(mainStyle.surface)};
-        color: ${unsafeCSS(mainStyle.primary)};
+      :host {
+        display: inline-block;
+        margin: 4px;
         cursor: pointer;
         user-select: none;
-        display: inline-block;
-        border-radius: 4px;
         min-width: 64px;
         height: 36px;
+      }
+
+      .button {
+        height: 100%;
+        background: ${unsafeCSS(mainStyle.surface)};
+        color: ${unsafeCSS(mainStyle.primary)};
+        border-radius: 4px;
         padding: 0 16px;
-        text-align: center;
         transition: box-shadow 0.1s;
       }
 
-      .container:hover {
+      .button:hover {
         background: ${unsafeCSS(mainStyle.primary)}1f;
       }
 
-      .container:active {
+      .button:active {
         background: ${unsafeCSS(mainStyle.primary)}3e;
       }
 
-      .container--shaped {
+      .button--shaped {
         border-radius: 18px;
       }
 
-      .container--outline {
+      .button--outline {
         color: ${unsafeCSS(mainStyle.onSurface)};
         border: ${unsafeCSS(mainStyle.primary)} 1pt solid;
       }
 
-      .container--fill {
+      .button--fill {
         background: ${unsafeCSS(mainStyle.primary)};
         color: ${unsafeCSS(mainStyle.onPrimary)};
       }
 
-      .container--fill:hover {
+      .button--fill:hover {
         background: ${unsafeCSS(mainStyle.primary)}e0;
       }
 
-      .container--fill:active {
+      .button--fill:active {
         background: ${unsafeCSS(mainStyle.primaryVariant)};
       }
 
-      .container--elevate {
+      .button--elevate {
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
         /* box-shadow: 0 2px 2px 0 ${unsafeCSS(mainStyle.primary)}24, 0 3px 1px -2px ${unsafeCSS(mainStyle.primary)}1f,
           0 1px 5px 0 ${unsafeCSS(mainStyle.primary)}33; */
       }
 
-      .container--elevate:active {
+      .button--elevate:active {
         box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12),
           0 5px 5px -3px rgba(0, 0, 0, 0.2);
         /* box-shadow: 0 8px 10px 1px ${unsafeCSS(mainStyle.primary)}24, 0 3px 14px 2px ${unsafeCSS(
@@ -81,7 +84,7 @@ class ThatButton extends LitElement {
           0 5px 5px -3px ${unsafeCSS(mainStyle.primary)}33; */
       }
 
-      .container--has-icon {
+      .button--has-icon {
         padding: 0 16px 0 14px;
       }
 
@@ -105,12 +108,12 @@ class ThatButton extends LitElement {
     return html`
       <div
         class=${classMap({
-          container: true,
-          'container--fill': this.fill,
-          'container--outline': this.outline,
-          'container--elevate': this.elevate,
-          'container--shaped': this.shaped,
-          'container--has-icon': this.icon != undefined,
+          button: true,
+          'button--fill': this.fill,
+          'button--outline': this.outline,
+          'button--elevate': this.elevate,
+          'button--shaped': this.shaped,
+          'button--has-icon': this.icon != undefined,
         })}
       >
         ${this.icon
@@ -124,10 +127,15 @@ class ThatButton extends LitElement {
   }
 
   firstUpdated(changedParameters) {
-    if (changedParameters.has('type')) {
-      this.type.forEach(param => {
-        param.charAt(0) == '!' ? (this[param.slice(1)] = false) : (this[param] = true)
-      })
+    if (changedParameters.has('type') && this.type.length > 0) {
+      if (this.type[0] != 'text') {
+        this.type.forEach(param => {
+          param.charAt(0) == '!' ? (this[param.slice(1)] = false) : (this[param] = true)
+        })
+      }
+    } else {
+      this.fill = true
+      this.elevate = true
     }
   }
 }

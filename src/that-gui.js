@@ -36,10 +36,9 @@ class ThatGui {
 
       this.controllerElements[pathKey] = controllerElement
 
-      // if (Array.isArray(object)) {
-      //   value = [...object]
-      // } else
-      if (typeof object === 'object') {
+      if (Array.isArray(object)) {
+        value = [...object]
+      } else if (typeof object === 'object') {
         for (let childKey in object) {
           if (!childKey.startsWith('_')) {
             this.addController(childKey, object, pathKey)
@@ -115,17 +114,17 @@ window.onload = () => {
     number: {
       small: 0.5,
       larger: 4263,
-      limitted: -128.989999,
+      limitted: -128,
       _limitted: {
         min: -256,
         max: 512,
-        step: 0.000001,
+        step: 8,
       },
       range: [0.5, 23],
       _range: {
         min: 0,
         max: 100,
-        step: 0.02
+        step: 0.02,
       },
       array: [0, 0.5, 1, 10, 100, 1000],
       _array: {
@@ -134,6 +133,9 @@ window.onload = () => {
     },
     string: {
       string: 'hello world',
+      _string: {
+        label: 'Label'
+      },
       array: ['resistance', 'is', 'futile'],
       _array: {
         minimise: true,
@@ -146,6 +148,89 @@ window.onload = () => {
       switchOff: false,
       array: [true, true, false, true, true, false, false, true],
       _array: { minimise: true },
+    },
+    function: {
+      default: () => {
+        console.log('default')
+      },
+      textButton: () => {
+        console.log('text')
+      },
+      _textButton: {
+        type: 'function text',
+      },
+      filledButton: () => {
+        console.log('filled')
+      },
+      _filledButton: {
+        type: 'function fill',
+      },
+      outlinedButton: () => {
+        console.log('outlined')
+      },
+      _outlinedButton: {
+        type: 'function outline',
+      },
+      elevatedButton: () => {
+        console.log('elevated')
+      },
+      _elevatedButton: {
+        type: 'function elevate',
+      },
+      shapedAndFilledButton: () => {
+        console.log('shaped')
+      },
+      _shapedAndFilledButton: {
+        label: 'shaped & filled',
+        type: 'function shaped fill',
+      },
+      array: [
+        () => {
+          console.log('one')
+        },
+        () => {
+          console.log('two')
+        },
+        () => {
+          console.log('three')
+        },
+        () => {
+          console.log('four')
+        },
+        () => {
+          console.log('i')
+        },
+        () => {
+          console.log('declare')
+        },
+        () => {
+          console.log('a')
+        },
+        () => {
+          console.log('thumb')
+        },
+        () => {
+          console.log('war')
+        },
+        () => {
+          console.log('bitch')
+        },
+      ],
+      _array: {
+        type: 'functionArray',
+        options: [
+          { type: 'outline', label: 'placeholder' },
+          { type: 'outline elevate' },
+          { type: 'fill shaped', label: 'demo' },
+          { label: 'reset sketch' },
+          { type: 'elevate shaped' },
+          { type: 'outline', label: 'remove nodes' },
+          { type: 'outline text' },
+          { type: 'fill shaped', label: 'submit' },
+          { label: 'surrender your ships' },
+          { type: 'elevate shaped' },
+        ],
+      },
     },
     multiChoice: {
       dropdown: 'Chino',
@@ -160,10 +245,13 @@ window.onload = () => {
       },
       tabs: 'The',
       _tabs: { options: ['The', 'Chino', 'Short'] },
+      toggleButtons: 'Chino',
+      _toggleButtons: { options: ['The', 'Chino', 'Short'] },
       radiobuttons: 'Short',
       _radiobuttons: { options: ['The', 'Chino', 'Short'] },
       __all: { minimise: true },
     },
+    _multiChoice: { label: 'multiple choice' },
     color: {
       hex: '#FFFFFF',
       rgb: [255, 0, 1],
@@ -185,7 +273,7 @@ window.onload = () => {
       gradient: [['#123456', 0], ['#aef30c', 0.3], '#283ace', ['#235192', 1]],
     },
     custom: {
-      0: 0
+      0: 0,
       //support custom ones in here
     },
     __all: { minimise: true },

@@ -12,6 +12,7 @@ class ThatController extends LitElement {
     super()
     this.minimise = false
     this.actions = []
+    this.options = []
   }
 
   static get properties() {
@@ -32,7 +33,7 @@ class ThatController extends LitElement {
       max: { type: Number },
       step: { type: Number },
       icon: { type: String },
-      options: { type: Array }
+      options: { type: Array },
     }
   }
 
@@ -43,40 +44,41 @@ class ThatController extends LitElement {
       }
 
       .container {
-        font-family: Alata;
+        font-family: ${unsafeCSS(mainStyle.fontFamily)};
         display: block;
-        margin-top: 15px;
+        margin-top: 10px;
         padding: 10px;
         position: relative;
         background: ${unsafeCSS(mainStyle.surface)};
         color: ${unsafeCSS(mainStyle.onSurface)};
         border-radius: 8px;
-        transition: box-shadow 0.2s;
-        transition-delay: 0.1s;
+        transition: box-shadow 0.2s ease-out;
       }
 
       .container--has-children {
-        border: 1px solid ${unsafeCSS(mainStyle.onSurface)}1f;
+        border: 1px solid ${unsafeCSS(mainStyle.onSurface)}1a;
+      }
+
+      .container:not(.container--elevate).container--has-children:hover {
+        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
       }
 
       .container--elevate {
-        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
-        transition-delay: 0s;
+        box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.20);
       }
 
       .container--elevate:hover {
-        box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 3px 3px -2px rgba(0, 0, 0, 0.12), 0 1px 8px 0 rgba(0, 0, 0, 0.2);
+        box-shadow: 0 12px 17px 2px rgba(0,0,0,0.14), 0 5px 22px 4px rgba(0,0,0,0.12), 0 7px 8px -4px rgba(0,0,0,0.20);
+        z-index: 1;
       }
 
       .minimise-button {
         cursor: pointer;
         user-select: none;
-        float: left;
         margin: 0 10px 0 5px;
       }
 
       .controller-options {
-        display: none; /* add this back at some point */
         float: right;
       }
 
@@ -114,7 +116,13 @@ class ThatController extends LitElement {
               action => html`
                 <img
                   src="${action[1]}"
-                  style=${styleMap({ cursor: 'pointer', width: '1em', height: '1em' })}
+                  style=${styleMap({
+                    cursor: 'pointer',
+                    width: '1em',
+                    height: '1em',
+                    display: 'inline-block',
+                    'vertical-align': 'middle',
+                  })}
                   @click=${action[0]}
                 />
               `,
@@ -140,12 +148,6 @@ class ThatController extends LitElement {
         ],
         [
           () => {
-            this.updateValue(this.randomise())
-          },
-          randomise,
-        ],
-        [
-          () => {
             console.log(this.value)
           },
           settings,
@@ -159,9 +161,9 @@ class ThatController extends LitElement {
     switch (type[0]) {
       case 'number':
         return html`
-          ${this.label}:
-          <input
-            type="range"
+          ${this.label}
+          <that-slider
+            label=${this.label}
             min=${this.min || 0}
             max=${this.max || (this.initialValue > 1 ? Math.pow(10, this.initialValue.toString().length) : 1)}
             step=${this.step || (this.initialValue > 1 ? 1 : 0.001)}
@@ -169,19 +171,19 @@ class ThatController extends LitElement {
             @change=${event => {
               this.updateValue(Number(event.srcElement.value))
             }}
-          />
+          ></that-slider>
           ${this.value}
         `
 
       case 'string':
         return html`
-          ${this.label}:
-          <input
+          <that-input
             .value=${this.value}
+            .label=${this.label}
             @change=${event => {
               this.updateValue(event.srcElement.value)
             }}
-          />
+          ></that-input>
         `
 
       case 'boolean':
@@ -203,26 +205,40 @@ class ThatController extends LitElement {
             <that-button @click=${this.value} .icon=${this.icon} .type=${type}>${this.label}</that-button>
           </div>
         `
-
-      case 'object':
-        if (Array.isArray(this.value)) {
-          return html`
-            ${this.label}:
-            <input
-              .value=${this.value.toString()}
-              @change=${event => {
-                this.updateValue(event.srcElement.value.split(','))
-              }}
-            />
-          `
+      case 'functionArray':
+        const buttons = []
+        for (const i in this.value) {
+          buttons.push(html`
+            <that-button
+              @click=${this.value[i]}
+              .icon=${this.options[i].icon || undefined}
+              .type=${this.options[i].type ? this.options[i].type.split(' ') : []}
+              style=${styleMap({ flexGrow: 1 })}
+            >
+              ${this.options[i].label || i}
+            </that-button>
+          `)
         }
+        return html`
+          <div
+            style=${styleMap({
+              textAlign: 'center',
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-evenly',
+            })}
+          >
+            ${buttons}
+          </div>
+        `
 
       case 'title':
         return this.label
 
       default:
         return html`
-          <span style="color: red;">ERROR: Controller type not supported</span>
+          ${this.label}
+          <br /><span style="color: red;">ERROR: Controller type '${type[0]}' is not supported</span>
         `
     }
   }
