@@ -1,6 +1,6 @@
-import { LitElement, html, css, unsafeCSS } from 'lit-element'
+import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
-import { mainStyle } from '../styles'
+import { theme } from '../styles'
 
 class ThatButton extends LitElement {
   constructor() {
@@ -23,90 +23,99 @@ class ThatButton extends LitElement {
     return css`
       :host {
         display: inline-block;
-        margin: 4px;
+        font-size: 1em;
+        margin: 0.25em;
         cursor: pointer;
         user-select: none;
-        min-width: 64px;
-        height: 36px;
+        min-width: 4em;
+        height: 2.25em;
       }
 
       .button {
         height: 100%;
-        background: ${unsafeCSS(mainStyle.surface)};
-        color: ${unsafeCSS(mainStyle.primary)};
-        border-radius: 4px;
-        padding: 0 16px;
+        background: rgb(var(--surface));
+        color: rgb(var(--primary));
+        border-radius: 0.25em;
+        padding: 0 1em;
+        text-align: center;
         transition: box-shadow 0.1s;
       }
 
+      .button:focus {
+        outline: none;
+      }
+
       .button:hover {
-        background: ${unsafeCSS(mainStyle.primary)}1f;
+        background: rgb(var(--primary), 0.122);
       }
 
       .button:active {
-        background: ${unsafeCSS(mainStyle.primary)}3e;
+        background: rgb(var(--primary), 0.243);
       }
 
       .button--shaped {
-        border-radius: 18px;
+        border-radius: 1.125em;
       }
 
       .button--outline {
-        color: ${unsafeCSS(mainStyle.onSurface)};
-        border: ${unsafeCSS(mainStyle.primary)} 1pt solid;
+        color: rgb(var(--on-surface));
+        border: rgb(var(--primary)) 1pt solid;
       }
 
       .button--fill {
-        background: ${unsafeCSS(mainStyle.primary)};
-        color: ${unsafeCSS(mainStyle.onPrimary)};
+        background: rgb(var(--primary));
+        color: rgb(var(--on-primary));
       }
 
       .button--fill:hover {
-        background: ${unsafeCSS(mainStyle.primary)}e0;
+        background: rgb(var(--primary), 0.878);
       }
 
       .button--fill:active {
-        background: ${unsafeCSS(mainStyle.primaryVariant)};
+        background: rgb(var(--primary-variant));
       }
 
       .button--elevate {
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
-        /* box-shadow: 0 2px 2px 0 ${unsafeCSS(mainStyle.primary)}24, 0 3px 1px -2px ${unsafeCSS(mainStyle.primary)}1f,
-          0 1px 5px 0 ${unsafeCSS(mainStyle.primary)}33; */
       }
 
       .button--elevate:active {
         box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12),
           0 5px 5px -3px rgba(0, 0, 0, 0.2);
-        /* box-shadow: 0 8px 10px 1px ${unsafeCSS(mainStyle.primary)}24, 0 3px 14px 2px ${unsafeCSS(
-      mainStyle.primary,
-    )}1f,
-          0 5px 5px -3px ${unsafeCSS(mainStyle.primary)}33; */
       }
 
       .button--has-icon {
-        padding: 0 16px 0 14px;
+        padding: 0 1em 0 0.875em;
       }
 
       .text {
-        text-align: center;
-        font-family: ${unsafeCSS(mainStyle.fontFamily)};
-        font-size: 16px;
-        line-height: 36px;
+        line-height: 2.25em;
       }
 
       .icon {
-        padding: 9px 4px 9px 0;
+        padding: 0.5625em 0.25em 0.5625em 0;
         vertical-align: bottom;
-        height: 18px;
-        width: 18px;
+        height: 1.125em;
+        width: 1.125em;
       }
     `
   }
 
   render() {
     return html`
+      <style>
+        :host {
+          --primary: ${theme.primary};
+          --primary-variant: ${theme.primaryVariant};
+          --surface: ${theme.surface};
+          --error: ${theme.error};
+          --on-primary: ${theme.onPrimary};
+          --on-surface: ${theme.onSurface};
+          --on-error: ${theme.onError};
+        }
+      </style>
       <div
+        tabindex="0"
         class=${classMap({
           button: true,
           'button--fill': this.fill,

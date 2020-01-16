@@ -1,16 +1,23 @@
 import './components'
 import reset from './images/reset.svg'
+import { theme } from './styles'
 
 class ThatGui {
   constructor(options) {
-    this.element = document.createElement('that-container')
+    this.container = document.createElement('that-gui')
     if (options.parentID) {
-      document.getElementById(options.parentID).append(this.element)
+      document.getElementById(options.parentID).append(this.container)
     } else {
-      document.body.append(this.element)
+      document.body.append(this.container)
     }
     this.controllerElements = {}
     this.objects = {}
+    this.theme = theme
+    if (options.theme != undefined) {
+      for (let key in options.theme) {
+        this.theme[key] = options.theme[key]
+      }
+    }
   }
 
   add(objects) {
@@ -26,11 +33,13 @@ class ThatGui {
       const object = parentObject[key]
       const controllerElement = document.createElement('that-controller')
 
+      controllerElement.gui = this
+
       if (pathKey != undefined) {
         this.controllerElements[pathKey].appendChild(controllerElement)
         pathKey = pathKey + '.' + key
       } else {
-        this.element.appendChild(controllerElement)
+        this.container.appendChild(controllerElement)
         pathKey = key
       }
 
@@ -59,7 +68,7 @@ class ThatGui {
         controllerElement.type = 'title'
       }
 
-      controllerElement.parentObject = parentObject
+      controllerElement.object = parentObject
       controllerElement.path = pathKey
       controllerElement.key = key
       controllerElement.label = key
@@ -113,6 +122,9 @@ window.onload = () => {
     __value: 20,
     number: {
       small: 0.5,
+      _small: {
+        step: 0.01,
+      },
       larger: 4263,
       limitted: -128,
       _limitted: {
@@ -129,6 +141,7 @@ window.onload = () => {
       array: [0, 0.5, 1, 10, 100, 1000],
       _array: {
         minimise: true,
+        label: 'numberArray - Probably won\'t support this'
       },
     },
     string: {
@@ -139,6 +152,7 @@ window.onload = () => {
       array: ['resistance', 'is', 'futile'],
       _array: {
         minimise: true,
+        label: 'stringArray - Probably won\'t support this'
       },
     },
     boolean: {
@@ -352,6 +366,10 @@ window.onload = () => {
 
   window.gui = new ThatGui({
     parentID: 'settings',
+    theme: {
+      // primary: '255, 0, 0',
+      // surface: '255, 245, 250'
+    }
   })
   gui.add({ settings })
   gui.add({ secondObject, thirdObject })

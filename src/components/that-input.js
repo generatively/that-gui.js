@@ -1,11 +1,10 @@
-import { LitElement, html, css, unsafeCSS } from 'lit-element'
+import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
-import { mainStyle } from '../styles/index'
+import { theme } from '../styles/index'
 
 class ThatInput extends LitElement {
   constructor() {
     super()
-    this.value = ''
   }
 
   static get properties() {
@@ -13,7 +12,6 @@ class ThatInput extends LitElement {
       value: {},
       label: { type: String },
       type: { type: String },
-      // onChange: { type: Object },
       min: { type: Number },
       max: { type: Number },
       helpText: { type: String },
@@ -27,37 +25,38 @@ class ThatInput extends LitElement {
     return css`
       :host {
         display: inline-block;
+        font-size: 1em;
+        width: 17.5em;
+        margin: 0 0.3em;
       }
 
       .text-field {
         position: relative;
         box-sizing: border-box;
-        width: 280px;
-        height: 56px;
-        border-radius: 4px 4px 0 0;
-        border-bottom: 1px solid ${unsafeCSS(mainStyle.onSurface)}99;
-        background: ${unsafeCSS(mainStyle.onSurface)}0a;
+        height: 3.5em;
+        border-radius: 0.25em 0.25em 0 0;
+        border-bottom: 0.0625em solid rgba(var(--on-surface), 0.6);
+        background: rgba(var(--on-surface), 0.039);
         transition: border 0.2s, background-color 0.2s;
       }
 
       .text-field:hover {
-        background: ${unsafeCSS(mainStyle.onSurface)}10;
+        background: rgba(var(--on-surface), 0.063);
       }
 
       .text-field:focus-within {
-        background: ${unsafeCSS(mainStyle.onSurface)}1a;
-        border-bottom: 2px solid ${unsafeCSS(mainStyle.primary)}99;
+        background: rgba(var(--on-surface), 0.102);
+        border-bottom: 0.125em solid rgba(var(--primary), 0.6);
       }
 
       .text-field__input {
         position: absolute;
-        top: 20px;
-        left: 12px;
-        width: 100%;
-        height: calc(100% - 20px);
-        font-family: ${unsafeCSS(mainStyle.fontFamily)};
-        font-size: 16px;
-        color: ${unsafeCSS(mainStyle.onSurface)}de;
+        top: 1.25em;
+        left: 0.54em;
+        width: calc(100% - 1.08em);
+        height: calc(100% - 1.25em);
+        font-size: inherit;
+        color: rgba(var(--on-surface), 0.871);
         border: none;
         background: none;
       }
@@ -69,29 +68,34 @@ class ThatInput extends LitElement {
       .text-field__label {
         position: absolute;
         top: 50%;
-        left: 12px;
+        left: 0.75em;
         transform: translateY(-50%);
-        font-size: 16px;
-        color: ${unsafeCSS(mainStyle.onSurface)}99;
+        color: rgba(var(--on-surface), 0.6);
         transition: top 0.2s, transform 0.2s, font-size 0.2s;
       }
 
       .text-field__input:focus + .text-field__label,
       .text-field__label--float {
-        top: 18px;
+        top: 1.125em;
         transform: translateY();
-        font-size: 12px;
-        line-height: 20px;
-        color: ${unsafeCSS(mainStyle.primary)};
+        font-size: 0.75em;
+        line-height: 1.25em;
+        color: rgba(var(--primary));
       }
     `
   }
 
   render() {
     return html`
+      <style>
+        :host {
+          --primary: ${theme.primary};
+          --on-surface: ${theme.onSurface};
+        }
+      </style>
       <div class=${classMap({ 'text-field': true })}>
         <input
-          value=${this.value}
+          .value=${this.value}
           @change=${event => {
             this.value = event.srcElement.value
             this.dispatchEvent(new Event('change'))
