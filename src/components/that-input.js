@@ -1,6 +1,5 @@
 import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
-import { theme } from '../styles/index'
 
 class ThatInput extends LitElement {
   constructor() {
@@ -28,6 +27,8 @@ class ThatInput extends LitElement {
         font-size: 1em;
         width: 17.5em;
         margin: 0 0.3em;
+        --primary: 98, 0, 238;
+        --on-surface: 0, 0, 0;
       }
 
       .text-field {
@@ -87,12 +88,6 @@ class ThatInput extends LitElement {
 
   render() {
     return html`
-      <style>
-        :host {
-          --primary: ${theme.primary};
-          --on-surface: ${theme.onSurface};
-        }
-      </style>
       <div class=${classMap({ 'text-field': true })}>
         <input
           .value=${this.value}

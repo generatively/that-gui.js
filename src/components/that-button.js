@@ -1,6 +1,5 @@
 import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
-import { theme } from '../styles'
 
 class ThatButton extends LitElement {
   constructor() {
@@ -29,6 +28,13 @@ class ThatButton extends LitElement {
         user-select: none;
         min-width: 4em;
         height: 2.25em;
+        --primary: 98, 0, 238;
+        --primary-variant: 55, 0, 179;
+        --surface: 255, 255, 255;
+        --error: 176, 0, 32;
+        --on-primary: 255, 255, 255;
+        --on-surface: 0, 0, 0;
+        --on-error: 255, 255, 255;
       }
 
       .button {
@@ -103,17 +109,6 @@ class ThatButton extends LitElement {
 
   render() {
     return html`
-      <style>
-        :host {
-          --primary: ${theme.primary};
-          --primary-variant: ${theme.primaryVariant};
-          --surface: ${theme.surface};
-          --error: ${theme.error};
-          --on-primary: ${theme.onPrimary};
-          --on-surface: ${theme.onSurface};
-          --on-error: ${theme.onError};
-        }
-      </style>
       <div
         tabindex="0"
         class=${classMap({

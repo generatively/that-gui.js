@@ -1,6 +1,5 @@
 import './components'
 import reset from './images/reset.svg'
-import { theme } from './styles'
 
 class ThatGui {
   constructor(options) {
@@ -12,11 +11,20 @@ class ThatGui {
     }
     this.controllerElements = {}
     this.objects = {}
-    this.theme = theme
-    if (options.theme != undefined) {
-      for (let key in options.theme) {
-        this.theme[key] = options.theme[key]
-      }
+    this.theme = {
+      primary: '98, 0, 238',
+      primaryVariant: '55, 0, 179',
+      secondary: '3, 218, 198',
+      secondaryVariant: '1, 135, 134',
+      background: '255, 255, 255',
+      surface: '255, 255, 255',
+      error: '176, 0, 32',
+      onPrimary: '255, 255, 255',
+      onSecondary: '0, 0, 0',
+      onBackground: '0, 0, 0',
+      onSurface: '0, 0, 0',
+      onError: '255, 255, 255',
+      ...options.theme,
     }
   }
 
@@ -132,8 +140,9 @@ window.onload = () => {
         max: 512,
         step: 8,
       },
-      range: [0.5, 23],
+      range: [20, 40],
       _range: {
+        type: 'range',
         min: 0,
         max: 100,
         step: 0.02,
@@ -141,18 +150,18 @@ window.onload = () => {
       array: [0, 0.5, 1, 10, 100, 1000],
       _array: {
         minimise: true,
-        label: 'numberArray - Probably won\'t support this'
+        label: "numberArray - Probably won't support this",
       },
     },
     string: {
       string: 'hello world',
       _string: {
-        label: 'Label'
+        label: 'Label',
       },
       array: ['resistance', 'is', 'futile'],
       _array: {
         minimise: true,
-        label: 'stringArray - Probably won\'t support this'
+        label: "stringArray - Probably won't support this",
       },
     },
     boolean: {
@@ -290,7 +299,6 @@ window.onload = () => {
       0: 0,
       //support custom ones in here
     },
-    __all: { minimise: true },
   }
   const secondObject = {
     __value: 120,
@@ -367,9 +375,8 @@ window.onload = () => {
   window.gui = new ThatGui({
     parentID: 'settings',
     theme: {
-      // primary: '255, 0, 0',
-      // surface: '255, 245, 250'
-    }
+      // primary: '255, 100, 0',
+    },
   })
   gui.add({ settings })
   gui.add({ secondObject, thirdObject })

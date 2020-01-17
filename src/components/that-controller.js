@@ -1,7 +1,6 @@
 import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
 import { styleMap } from 'lit-html/directives/style-map'
-import { theme } from '../styles'
 //replace SVGs with divs + animations
 import reset from '../images/reset.svg'
 import settings from '../images/settings.svg'
@@ -21,6 +20,7 @@ class ThatController extends LitElement {
       label: { type: String },
       object: { type: Object },
       gui: { type: Object },
+      // theme: { type: Object },
       type: { type: String },
       tags: { type: Array },
       actions: { type: Array },
@@ -148,9 +148,22 @@ class ThatController extends LitElement {
   render() {
     return html`
       <style>
-        :host {
-          --surface: ${theme.surface};
-          --on-surface: ${theme.onSurface};
+        :host,
+        that-button,
+        that-input,
+        that-slider {
+          --primary: ${this.gui.theme.primary};
+          --primary-variant: ${this.gui.theme.primaryVariant};
+          --secondary: ${this.gui.theme.secondary};
+          --secondary-variant: ${this.gui.theme.secondaryVariant};
+          --background: ${this.gui.theme.background};
+          --surface: ${this.gui.theme.surface};
+          --error: ${this.gui.theme.error};
+          --on-primary: ${this.gui.theme.onPrimary};
+          --on-secondary: ${this.gui.theme.onSecondary};
+          --on-background: ${this.gui.theme.onBackground};
+          --on-surface: ${this.gui.theme.onSurface};
+          --on-error: ${this.gui.theme.onError};
         }
       </style>
       <div
@@ -167,6 +180,11 @@ class ThatController extends LitElement {
             'controller__form-container': this.type != 'title',
             'controller__form-container--is-title': this.type == 'title',
           })}
+          @click=${this.type == 'title'
+            ? () => {
+                this.setMinimised(!this.minimise)
+              }
+            : undefined}
         >
           ${this.hasChildNodes()
             ? html`
@@ -290,12 +308,6 @@ class ThatController extends LitElement {
       }
     }
 
-    if (this.type == 'title') {
-      this.addEventListener('click', () => {
-        this.setMinimised(!this.minimise)
-      })
-    }
-
     this.addEventListener('mouseover', handleOver)
     this.addEventListener('touchstart', handleTouchStart)
     this.addEventListener('minimisetoggled', event => {
@@ -320,7 +332,23 @@ class ThatController extends LitElement {
             @change=${event => {
               this.updateValue(Number(event.srcElement.maxValue))
             }}
-            style=${styleMap({ width: '100%' })}
+            style=${styleMap({ width: 'initial' })}
+          ></that-slider>
+        `
+
+      case 'range':
+        return html`
+          <that-slider
+            .min=${this.min || 0}
+            .max=${this.max || (this.initialValue > 1 ? Math.pow(10, this.initialValue.toString().length) : 1)}
+            .step=${this.step || (this.initialValue > 1 ? 1 : 0.001)}
+            .minValue=${this.value[0]}
+            .maxValue=${this.value[1]}
+            .label=${this.label}
+            @change=${event => {
+              this.updateValue([Number(event.srcElement.minValue), Number(event.srcElement.maxValue)])
+            }}
+            style=${styleMap({ width: 'initial' })}
           ></that-slider>
         `
 

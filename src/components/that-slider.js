@@ -1,7 +1,6 @@
 import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
 import { styleMap } from 'lit-html/directives/style-map'
-import { theme } from '../styles/index'
 
 class ThatSlider extends LitElement {
   constructor() {
@@ -9,7 +8,7 @@ class ThatSlider extends LitElement {
     this.maxValue = 0
     this.min = 0
     this.max = 100
-    this.step = 0
+    this.step = 0.1
     this.label = ''
   }
 
@@ -29,11 +28,16 @@ class ThatSlider extends LitElement {
   static get styles() {
     return css`
       :host {
-        display: inline-flex;
+        --primary: 98, 0, 238;
+        --surface: 255, 255, 255;
+        --on-primary: 255, 255, 255;
+        --on-surface: 0, 0, 0;
+        display: flex;
         background: rgb(var(--surface));
         color: rgb(var(--on-surface));
         font-size: 1em;
         border-radius: 0.25em;
+        width: 17.5em;
       }
 
       .label {
@@ -48,26 +52,23 @@ class ThatSlider extends LitElement {
         height: 3em;
         cursor: pointer;
         vertical-align: middle;
-        touch-action: none;
-        user-select: none;
-      }
-
-      .slider:focus {
-        outline: none;
       }
 
       .slider__track {
-        pointer-events: none;
         position: absolute;
         top: 50%;
-        left: 0.5em;
+        left: 0.8em;
         transform: translateY(-50%);
-        width: calc(100% - 1em);
+        width: calc(100% - 1.6em);
         height: 0.125em;
         background: rgba(var(--primary), 0.239);
+        user-select: none;
+        touch-action: none;
+        pointer-events: none;
       }
 
       .slider__bar {
+        position: relative;
         height: 0.125em;
         background: rgb(var(--primary));
         transform-origin: left;
@@ -78,7 +79,12 @@ class ThatSlider extends LitElement {
         top: 50%;
       }
 
+      .slider__thumb-container:focus-within {
+        z-index: 1;
+      }
+
       .slider__thumb {
+        pointer-events: initial;
         position: absolute;
         top: 50%;
         transform: translate(-50%, -50%);
@@ -86,31 +92,30 @@ class ThatSlider extends LitElement {
         height: 0.75em;
         border-radius: 0.75em;
         background: rgb(var(--primary));
-        transition: width 0.1s, height 0.1s;
+        transition: transform 0.1s;
       }
 
-      .slider:active .slider__thumb {
-        width: 1em;
-        height: 1em;
+      .slider__thumb:focus {
+        outline: none;
+        transform: translate(-50%, -50%) scale(1.34);
       }
 
       .slider__focus-ring {
         position: absolute;
         top: 50%;
-        transform: translate(-50%, -50%);
-        width: 0;
-        height: 0;
+        transform: translate(-50%, -50%) scale(0);
+        width: 2em;
+        height: 2em;
         border-radius: 1em;
         background: rgba(var(--primary), 0.188);
         opacity: 0;
-        transition: width 0.1s, height 0.1s, opacity 0.1s;
+        transition: transform 0.1s, opacity 0.1s;
       }
 
-      .slider:focus .slider__focus-ring,
-      .slider:active .slider__focus-ring {
+      .slider__thumb:focus + .slider__focus-ring,
+      .slider__thumb:active + .slider__focus-ring {
         opacity: 1;
-        width: 2em;
-        height: 2em;
+        transform: translate(-50%, -50%) scale(1);
       }
 
       .slider__value-container {
@@ -121,7 +126,7 @@ class ThatSlider extends LitElement {
       }
 
       .slider:hover .slider__value-container,
-      .slider:active .slider__value-container {
+      .slider__thumb:focus ~ .slider__value-container {
         transform: translate(-50%, calc(-50% - 0.9em)) scale(1);
       }
 
@@ -141,7 +146,7 @@ class ThatSlider extends LitElement {
         line-height: 1.125em;
         padding: 0.3em 0.63em;
         border-radius: 0.25em;
-        transform: translate(-50%, calc(-50% - 0.5em));
+        transform: translate(-50%, calc(-50% - 0.6em));
         font-size: 1em;
         text-align: center;
         background-color: rgb(var(--primary));
@@ -152,27 +157,43 @@ class ThatSlider extends LitElement {
 
   render() {
     return html`
-      <style>
-        :host {
-          --primary: ${theme.primary};
-          --surface: ${theme.surface};
-          --on-primary: ${theme.onPrimary};
-          --on-surface: ${theme.onSurface};
-        }
-      </style>
       <span class=${classMap({ label: true })}>${this.label}</span>
-      <div tabindex="0" id="slider" class=${classMap({ slider: true })}>
-        <div class=${classMap({ slider__track: true })}>
+      <div id="slider" class=${classMap({ slider: true })}>
+        <div id="track" class=${classMap({ slider__track: true })}>
           <div
             class=${classMap({ slider__bar: true })}
-            style=${styleMap({ transform: `scaleX(${this.scale(this.maxValue, this.min, this.max, 0, 1)})` })}
+            style=${styleMap({
+              left: this.minValue != undefined ? `${this._scale(this.minValue, this.min, this.max, 0, 100)}%` : '',
+              transform: `scaleX(${this._scale(
+                this.maxValue - (this.minValue != undefined ? this.minValue : 0),
+                this.min,
+                this.max,
+                0,
+                1,
+              )})`,
+            })}
           ></div>
+          ${this.minValue != undefined
+            ? html`
+                <div
+                  class=${classMap({ 'slider__thumb-container': true })}
+                  style=${styleMap({ left: `${this._scale(this.minValue, this.min, this.max, 0, 100)}%` })}
+                >
+                  <div tabindex="0" id="min" class=${classMap({ slider__thumb: true })}></div>
+                  <div class=${classMap({ 'slider__focus-ring': true })}></div>
+                  <div class=${classMap({ 'slider__value-container': true })}>
+                    <div class=${classMap({ 'slider__value-arrow': true })}></div>
+                    <div class=${classMap({ 'slider__value-text': true })}>${this.minValue}</div>
+                  </div>
+                </div>
+              `
+            : ''}
           <div
             class=${classMap({ 'slider__thumb-container': true })}
-            style=${styleMap({ left: `${this.scale(this.maxValue, this.min, this.max, 0, 100)}%` })}
+            style=${styleMap({ left: `${this._scale(this.maxValue, this.min, this.max, 0, 100)}%` })}
           >
+            <div tabindex="0" id="max" class=${classMap({ slider__thumb: true })}></div>
             <div class=${classMap({ 'slider__focus-ring': true })}></div>
-            <div class=${classMap({ slider__thumb: true })}></div>
             <div class=${classMap({ 'slider__value-container': true })}>
               <div class=${classMap({ 'slider__value-arrow': true })}></div>
               <div class=${classMap({ 'slider__value-text': true })}>${this.maxValue}</div>
@@ -184,19 +205,65 @@ class ThatSlider extends LitElement {
   }
 
   firstUpdated(changedProperties) {
-    this.setupEventListeners()
+    this._setupEventListeners()
   }
 
-  scale(number, inMin, inMax, outMin, outMax) {
+  updated(changedProperties) {
+    if (this.minValue != undefined && (changedProperties.has('maxValue') || changedProperties.has('minValue'))) {
+      if (this.maxValue - this.minValue < 0) {
+        const minValue = this.minValue
+        this.minValue = this.maxValue
+        this.maxValue = minValue
+      }
+
+      // if (this.minDiff != undefined && Math.abs(this.maxValue - this.minValue) < this.minDiff) {
+      //   this.minValue = this.maxValue - this.minDiff
+      // }
+
+      // if (this.maxDiff != undefined && Math.abs(this.maxValue - this.minValue) > this.maxDiff) {
+      //   this.minValue = this.maxValue - this.maxDiff
+      // }
+    }
+  }
+
+  _scale(number, inMin, inMax, outMin, outMax) {
     return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin
   }
 
-  setupEventListeners() {
+  _setupEventListeners() {
     const that = this
-    const sliderElem = that.shadowRoot.getElementById('slider')
+    const sliderElem = this.shadowRoot.getElementById('slider')
+    const trackElem = this.shadowRoot.getElementById('track')
+    const minThumbElem = this.shadowRoot.getElementById('min')
+    const maxThumbElem = this.shadowRoot.getElementById('max')
+    let currentThumb = true
+
+    const getMousePos = event => {
+      return event.type == 'touchmove' || event.type == 'touchstart' ? event.targetTouches[0].pageX : event.pageX
+    }
+
+    const updateClosestThumb = event => {
+      const mousePos = getMousePos(event)
+      if (
+        minThumbElem != undefined &&
+        Math.abs(mousePos - minThumbElem.getBoundingClientRect().left) <
+          Math.abs(mousePos - maxThumbElem.getBoundingClientRect().left)
+      ) {
+        window.setTimeout(() => {
+          minThumbElem.focus()
+        }, 0)
+        currentThumb = false
+      } else {
+        window.setTimeout(() => {
+          maxThumbElem.focus()
+        }, 0)
+        currentThumb = true
+      }
+    }
 
     const handleMouseDown = event => {
       if (event.buttons == 1) {
+        updateClosestThumb(event)
         handleMove(event)
         document.addEventListener('mousemove', handleMove)
         document.addEventListener('mouseup', handleMouseUp)
@@ -205,48 +272,136 @@ class ThatSlider extends LitElement {
 
     const handleMouseUp = event => {
       if (event.buttons == 0) {
+        this.dispatchEvent(new Event('change'))
         document.removeEventListener('mousemove', handleMove)
         document.removeEventListener('mouseup', handleMouseUp)
-        this.dispatchEvent(new Event('change'))
       }
+    }
+
+    const handleMouseOver = event => {
+      sliderElem.addEventListener('wheel', handleWheel)
+      sliderElem.addEventListener('mouseout', handleMouseOut)
+    }
+
+    const handleMouseOut = event => {
+      sliderElem.removeEventListener('wheel', handleWheel)
+      sliderElem.removeEventListener('mouseout', handleMouseOut)
     }
 
     const handleTouchStart = event => {
-      console.log(event)
+      updateClosestThumb(event)
+      handleMove(event)
       sliderElem.addEventListener('touchmove', handleMove)
       sliderElem.addEventListener('touchend', handleTouchEnd)
-      handleMove(event)
     }
 
     const handleTouchEnd = event => {
+      this.dispatchEvent(new Event('change'))
       sliderElem.removeEventListener('touchmove', handleMove)
       sliderElem.removeEventListener('touchend', handleTouchEnd)
-      this.dispatchEvent(new Event('change'))
     }
 
-    const handleMove = event => {
-      const elemRect = sliderElem.getBoundingClientRect()
-      const pos = getPos(event, elemRect)
-      if (pos <= 16) {
-        that.maxValue = that.min
-      } else if (pos >= elemRect.width - 16) {
-        that.maxValue = that.max
-      } else {
-        const newValue = that.scale((pos - 16) / (elemRect.width - 32), 0, 1, that.min, that.max)
-        that.maxValue = parseFloat((newValue - (newValue % that.step)).toPrecision(12))
+    const handleWheel = event => {
+      if (event.altKey) {
+        event.preventDefault()
+        updateClosestThumb(event)
+        const newValue =
+          (currentThumb ? this.maxValue : this.minValue) +
+          (-event.deltaY > 0 ? this.step : -this.step) * (event.shiftKey ? 10 : 1)
+        updateValue(newValue)
       }
     }
 
-    const getPos = (event, elemRect) => {
-      return (
-        (event.type == 'touchmove' || event.type == 'touchstart' ? event.targetTouches[0].pageX : event.pageX) -
-        elemRect.left +
+    const handleKeyDown = event => {
+      if (
+        !['Escape', 'ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', 'PageUp', 'PageDown', 'Home', 'End'].includes(
+          event.key,
+        )
+      )
+        return
+      event.preventDefault()
+      if (event.key == 'Escape') {
+        currentThumb ? maxThumbElem.blur() : minThumbElem.blur()
+        return
+      }
+
+      if (event.key == 'Home') {
+        currentThumb ? (this.maxValue = this.min) : (this.minValue = this.min)
+      } else if (event.key == 'End') {
+        currentThumb ? (this.maxValue = this.max) : (this.minValue = this.max)
+      } else {
+        let stepMultiplier = event.shiftKey ? 10 : 1
+        switch (event.key) {
+          // case 'ArrowRight':
+          // case 'ArrowUp':
+          //   break
+
+          case 'ArrowLeft':
+          case 'ArrowDown':
+            stepMultiplier *= -1
+            break
+
+          case 'PageUp':
+            stepMultiplier *= 10
+            break
+
+          case 'PageDown':
+            stepMultiplier *= -10
+            break
+        }
+
+        const stepAmount = this.step * stepMultiplier
+
+        updateValue(this[currentThumb ? 'maxValue' : 'minValue'] + stepAmount)
+      }
+
+      this.dispatchEvent(new Event('change'))
+    }
+
+    const updateValue = newValue => {
+      if (newValue > this.max || newValue < this.min) return
+
+      this[currentThumb ? 'maxValue' : 'minValue'] = parseFloat(newValue.toPrecision(12))
+
+      if ((currentThumb ? this.maxValue : this.minValue) > this.max)
+        this[currentThumb ? 'maxValue' : 'minValue'] = this.max
+      if ((currentThumb ? this.maxValue : this.minValue) < this.min)
+        this[currentThumb ? 'maxValue' : 'minValue'] = this.min
+    }
+
+    const handleMove = event => {
+      const pos =
+        getMousePos(event) -
+        trackElem.getBoundingClientRect().left +
         (window.pageXOffset || document.documentElement.scrollLeft)
+      let newValue
+
+      if (pos <= 0) {
+        newValue = that.min
+      } else if (pos >= trackElem.clientWidth) {
+        newValue = that.max
+      } else {
+        newValue = that._scale(pos / trackElem.clientWidth, 0, 1, that.min, that.max)
+      }
+
+      that[currentThumb ? 'maxValue' : 'minValue'] = parseFloat(
+        (that.step == 0 ? newValue : Math.ceil(newValue / that.step) * that.step).toPrecision(12),
       )
     }
 
+    if (minThumbElem) {
+      minThumbElem.addEventListener('keydown', handleKeyDown)
+      minThumbElem.addEventListener('focus', () => {
+        currentThumb = false
+      })
+      maxThumbElem.addEventListener('focus', () => {
+        currentThumb = true
+      })
+    }
+    maxThumbElem.addEventListener('keydown', handleKeyDown)
     sliderElem.addEventListener('mousedown', handleMouseDown)
     sliderElem.addEventListener('touchstart', handleTouchStart)
+    sliderElem.addEventListener('mouseover', handleMouseOver)
   }
 }
 
