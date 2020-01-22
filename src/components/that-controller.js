@@ -20,7 +20,6 @@ class ThatController extends LitElement {
       label: { type: String },
       object: { type: Object },
       gui: { type: Object },
-      // theme: { type: Object },
       type: { type: String },
       tags: { type: Array },
       actions: { type: Array },
@@ -41,6 +40,12 @@ class ThatController extends LitElement {
       :host {
         display: block;
         font-size: 1rem;
+        margin-top: 0.5em;
+        transition: font-size 0.2s;
+      }
+
+      ::slotted(that-controller:first-child) {
+        margin-top: 0;
       }
 
       that-input {
@@ -54,16 +59,14 @@ class ThatController extends LitElement {
         box-sizing: border-box;
         left: 0;
         width: 100%;
-        margin-top: 0.5em;
-        background: rgb(var(--surface));
         color: rgb(var(--on-surface));
         border-radius: 0.5em;
         transition: box-shadow 0.2s ease-out, width 0.2s, left 0.2s;
       }
 
       .controller--has-children {
-        border: 1px solid rgba(var(--on-surface), 0.102);
-        padding: 1em;
+        border: 1px solid rgba(var(--on-surface), 0.12);
+        background: rgb(var(--surface));
       }
 
       .controller:not(.controller--elevate).controller--has-children:hover {
@@ -71,7 +74,7 @@ class ThatController extends LitElement {
       }
 
       .controller--elevate {
-        border-color: rgb(var(--surface));
+        border: none;
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
       }
 
@@ -81,19 +84,45 @@ class ThatController extends LitElement {
         z-index: 1;
       }
 
+      .controller--has-children .controller__form-container {
+        padding: 1em;
+      }
+
       .controller__form-container {
         display: flex;
         align-items: center;
       }
 
-      .controller__form-container--is-title {
-        cursor: pointer;
-      }
-
-      .controller__minimise-button {
+      .controller--has-children .controller__form-container--is-title {
+        display: block;
         cursor: pointer;
         user-select: none;
-        margin: 0 10px 0 5px;
+      }
+
+      .controller__minimise-arrow-container {
+        cursor: pointer;
+        display: inline-block;
+        position: relative;
+        width: 2em;
+        height: 2em;
+        vertical-align: middle;
+      }
+
+      .controller__minimise-arrow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 0;
+        height: 0;
+        border-left: 0.4em solid transparent;
+        border-right: 0.4em solid transparent;
+        border-top: 0.4em solid rgba(var(--on-surface), 0.5);
+        transition: transform 0.2s linear, border-top-color 0.2s;
+      }
+
+      .controller__minimise-arrow--open {
+        transform: translate(-50%, -50%) rotate(-180deg);
       }
 
       .controller__form-component-container {
@@ -102,15 +131,17 @@ class ThatController extends LitElement {
         text-align: center;
       }
 
+      .controller__form-component-container--childless-title {
+        width: 100%;
+        padding: 1em 0;
+        color: rgb(var(--primary));
+      }
+
       .controller__actions {
         display: inline-flex;
         flex-wrap: nowrap;
-        width: 0;
         vertical-align: middle;
         user-select: none;
-        transform-origin: right;
-        transform: scale(0);
-        transition: width 0.1s, transform 0.1s;
       }
 
       .controller__action-item {
@@ -122,22 +153,20 @@ class ThatController extends LitElement {
         vertical-align: middle;
       }
 
+      .controller--has-children .controller__children {
+        padding: 1em;
+        padding-top: 0;
+      }
+
       .controller__children--minimise {
         display: none;
       }
 
-      @media (hover: none) {
-        .controller__actions {
-          width: initial;
-          transform: scale(1);
-        }
-
+      @media (max-width: 1000px), (hover: none) {
         .controller--active {
           transition-delay: 0.2s;
         }
-      }
 
-      @media (max-width: 1000px) {
         :host {
           font-size: 2rem;
         }
@@ -151,7 +180,9 @@ class ThatController extends LitElement {
         :host,
         that-button,
         that-input,
-        that-slider {
+        that-menu,
+        that-slider,
+        that-checkbox {
           --primary: ${this.gui.theme.primary};
           --primary-variant: ${this.gui.theme.primaryVariant};
           --secondary: ${this.gui.theme.secondary};
@@ -177,7 +208,7 @@ class ThatController extends LitElement {
         <div
           title="${this.path}"
           class=${classMap({
-            'controller__form-container': this.type != 'title',
+            'controller__form-container': true,
             'controller__form-container--is-title': this.type == 'title',
           })}
           @click=${this.type == 'title'
@@ -188,26 +219,48 @@ class ThatController extends LitElement {
         >
           ${this.hasChildNodes()
             ? html`
-                <span
-                  class=${classMap({ 'controller__minimise-button': true })}
+                <div
+                  class=${classMap({ 'controller__minimise-arrow-container': true })}
                   @click=${this.type != 'title'
                     ? () => {
                         this.setMinimised(!this.minimise)
                       }
                     : undefined}
                 >
-                  ${this.minimise ? '🡣' : '🡡'}
-                </span>
+                  <div
+                    class=${classMap({
+                      'controller__minimise-arrow': true,
+                      'controller__minimise-arrow--open': !this.minimise,
+                    })}
+                  ></div>
+                </div>
               `
             : ''}
-          <div class=${classMap({ 'controller__form-component-container': true })}>${this.appendForm()}</div>
-          <div id="actions" class=${classMap({ controller__actions: true })}>
-            ${this.actions.map(
-              action => html`
-                <img src=${action[1]} class=${classMap({ 'controller__action-item': true })} @click=${action[0]} />
-              `,
-            )}
+          <div
+            class=${classMap({
+              'controller__form-component-container': true,
+              'controller__form-component-container--childless-title': !this.hasChildNodes() && this.type == 'title',
+            })}
+          >
+            ${this.appendForm()}
           </div>
+          ${this.type != 'title'
+            ? html`
+                <div class=${classMap({ controller__actions: true })}>
+                  ${this.actions.map(
+                    action => html`
+                      <img
+                        src=${action[1]}
+                        class=${classMap({ 'controller__action-item': true })}
+                        @click=${() => {
+                          action[0](this)
+                        }}
+                      />
+                    `,
+                  )}
+                </div>
+              `
+            : ''}
         </div>
         <div
           id="children"
@@ -226,14 +279,14 @@ class ThatController extends LitElement {
       this.actions = [
         ...this.actions,
         [
-          () => {
-            this.updateValue(this.initialValue)
+          controller => {
+            controller.updateValue(controller.initialValue)
           },
           reset,
         ],
         [
-          () => {
-            console.log(this.value)
+          controller => {
+            console.log(controller.value)
           },
           settings,
         ],
@@ -244,7 +297,6 @@ class ThatController extends LitElement {
   setupEventListeners() {
     const containerElem = this.shadowRoot.getElementById('controller')
     const activeLeftPosition = -0.5 * (this.gui.container.shadowRoot.firstElementChild.clientWidth - this.clientWidth)
-    const actionsElem = this.shadowRoot.getElementById('actions')
 
     const setActive = active => {
       if (active && this.hasChildNodes() && !this.minimise) {
@@ -264,11 +316,6 @@ class ThatController extends LitElement {
         ((!event.target.hasChildNodes() || event.target.minimise) && event.target.parentElement == this)
       ) {
         setActive(true)
-        if (window.matchMedia('(hover: hover)').matches) {
-          actionsElem.style.width = `${this.actions.length * 1.25}em`
-          actionsElem.style.transform = `scale(1)`
-          actionsElem.classList.add('controller__actions--active')
-        }
         this.addEventListener('mouseout', handleOut)
       }
     }
@@ -279,11 +326,6 @@ class ThatController extends LitElement {
         ((!event.target.hasChildNodes() || event.target.minimise) && event.target.parentElement == this)
       ) {
         setActive(false)
-        if (window.matchMedia('(hover: hover)').matches) {
-          actionsElem.style.width = 0
-          actionsElem.style.transform = `scale(0)`
-          actionsElem.classList.remove('controller__actions--active')
-        }
         this.removeEventListener('mouseout', handleOut)
       }
     }
@@ -352,27 +394,45 @@ class ThatController extends LitElement {
           ></that-slider>
         `
 
+      case 'input':
       case 'string':
         return html`
           <that-input
             .value=${this.value}
             .label=${this.label}
+            @change=${typeof this.value == 'number'
+              ? event => {
+                  const newValue = Number(event.srcElement.value)
+                  if (!isNaN(newValue)) this.updateValue(newValue)
+                }
+              : event => {
+                  this.updateValue(event.srcElement.value)
+                }}
+          ></that-input>
+        `
+      case 'menu':
+        return html`
+          <that-menu
+            .value=${this.value}
+            .label=${this.label}
+            .options=${this.options}
             @change=${event => {
               this.updateValue(event.srcElement.value)
             }}
-          ></that-input>
+            style=${styleMap({ width: 'calc(100% - 0.6em)' })}
+          ></that-menu>
         `
 
       case 'boolean':
         return html`
-          ${this.label}:
-          <input
-            type="checkbox"
-            ?checked=${this.value}
+          <that-checkbox
+            .value=${this.value}
+            .label=${this.label}
             @change=${event => {
-              this.updateValue(event.srcElement.checked)
+              this.updateValue(event.srcElement.value)
             }}
-          />
+            style=${styleMap({ float: 'left' })}
+          ></that-checkbox>
         `
 
       case 'function':
@@ -406,7 +466,7 @@ class ThatController extends LitElement {
         `
 
       case 'title':
-        return this.label
+        return this.value != undefined && typeof this.value != 'object' ? this.value : this.label
 
       default:
         return html`

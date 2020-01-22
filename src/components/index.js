@@ -1,5 +1,7 @@
-import './that-container'
+import './that-gui'
 import './that-controller'
 import './that-slider'
 import './that-input'
 import './that-button'
+import './that-menu'
+import './that-checkbox'

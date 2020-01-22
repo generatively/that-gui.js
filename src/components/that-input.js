@@ -72,7 +72,11 @@ class ThatInput extends LitElement {
         left: 0.75em;
         transform: translateY(-50%);
         color: rgba(var(--on-surface), 0.6);
-        transition: top 0.2s, transform 0.2s, font-size 0.2s;
+        transition: top 0.2s, transform 0.2s, font-size 0.2s, color 0.2s;
+      }
+
+      .text-field__input:focus + .text-field__label {
+        color: rgba(var(--primary));
       }
 
       .text-field__input:focus + .text-field__label,
@@ -81,7 +85,6 @@ class ThatInput extends LitElement {
         transform: translateY();
         font-size: 0.75em;
         line-height: 1.25em;
-        color: rgba(var(--primary));
       }
     `
   }

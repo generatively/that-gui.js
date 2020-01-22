@@ -95,6 +95,11 @@ class ThatGui {
     }
   }
 
+  updateAllControllers() {
+    for (let elem in this.controllerElements)
+      this.controllerElements[elem].requestUpdate()
+  }
+
   // refreshControllers(startPointKey) {
   //   if (startPointKey.length > 0) {
   //     const topControllerIndex = Array.prototype.indexOf.call(this.controllerElements[startPointKey].parentNode.children, this.controllerElements[startPointKey])
@@ -128,6 +133,8 @@ class ThatGui {
 window.onload = () => {
   const settings = {
     __value: 20,
+    title: 'title test. This is a title right here',
+    _title: { type: 'title' },
     number: {
       small: 0.5,
       _small: {
@@ -147,21 +154,11 @@ window.onload = () => {
         max: 100,
         step: 0.02,
       },
-      array: [0, 0.5, 1, 10, 100, 1000],
-      _array: {
-        minimise: true,
-        label: "numberArray - Probably won't support this",
-      },
     },
     string: {
       string: 'hello world',
       _string: {
         label: 'Label',
-      },
-      array: ['resistance', 'is', 'futile'],
-      _array: {
-        minimise: true,
-        label: "stringArray - Probably won't support this",
       },
     },
     boolean: {
@@ -170,10 +167,10 @@ window.onload = () => {
       switchOn: true,
       switchOff: false,
       array: [true, true, false, true, true, false, false, true],
-      _array: { minimise: true },
+      _array: { type: 'booleanArray', minimise: true },
     },
     function: {
-      default: () => {
+      DEFAULT: () => {
         console.log('default')
       },
       textButton: () => {
@@ -256,22 +253,18 @@ window.onload = () => {
       },
     },
     multiChoice: {
-      dropdown: 'Chino',
-      _dropdown: { options: ['The', 'Chino', 'Short'] },
-      dropdownArray: ['The', 'they', 'they'],
-      _dropdownArray: {
-        options: [
-          ['The', 'Chino', 'Short'],
-          ['are', 'they', 'good'],
-          ['or', "aren't", 'they'],
-        ],
-      },
+      unsetMenu: '',
+      _unsetMenu: { type: 'menu', options: ['The', 'Chino', 'Short'] },
+      menu: 'Chino',
+      _menu: { type: 'menu', options: ['The', 'Chino', 'Short'] },
+      nestedMenu: 'Chino',
+      _nestedMenu: { type: 'menu', options: ['The', ['Chino', 'Grey'], ['Short', 'Pant']] },
       tabs: 'The',
-      _tabs: { options: ['The', 'Chino', 'Short'] },
+      _tabs: { type: 'tabs', options: ['The', 'Chino', 'Short'] },
       toggleButtons: 'Chino',
-      _toggleButtons: { options: ['The', 'Chino', 'Short'] },
+      _toggleButtons: { type: 'toggle', options: ['The', 'Chino', 'Short'] },
       radiobuttons: 'Short',
-      _radiobuttons: { options: ['The', 'Chino', 'Short'] },
+      _radiobuttons: { type: 'radio', options: ['The', 'Chino', 'Short'] },
       __all: { minimise: true },
     },
     _multiChoice: { label: 'multiple choice' },
@@ -375,7 +368,9 @@ window.onload = () => {
   window.gui = new ThatGui({
     parentID: 'settings',
     theme: {
-      // primary: '255, 100, 0',
+      primary: `${(Math.random() * 255).toPrecision(3)}, ${(Math.random() * 255).toPrecision(3)}, ${(
+        Math.random() * 255
+      ).toPrecision(3)}`,
     },
   })
   gui.add({ settings })

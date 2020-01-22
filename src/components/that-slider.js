@@ -10,6 +10,8 @@ class ThatSlider extends LitElement {
     this.max = 100
     this.step = 0.1
     this.label = ''
+    this.showCurrentValue = true
+    this.currentThumb_ = true
   }
 
   static get properties() {
@@ -22,6 +24,8 @@ class ThatSlider extends LitElement {
       max: { type: Number },
       step: { type: Number },
       label: { type: String },
+      showCurrentValue: { type: Boolean },
+      currentThumb_: { type: Boolean },
     }
   }
 
@@ -52,6 +56,7 @@ class ThatSlider extends LitElement {
         height: 3em;
         cursor: pointer;
         vertical-align: middle;
+        user-select: none;
       }
 
       .slider__track {
@@ -62,7 +67,6 @@ class ThatSlider extends LitElement {
         width: calc(100% - 1.6em);
         height: 0.125em;
         background: rgba(var(--primary), 0.239);
-        user-select: none;
         touch-action: none;
         pointer-events: none;
       }
@@ -152,6 +156,19 @@ class ThatSlider extends LitElement {
         background-color: rgb(var(--primary));
         color: rgb(var(--on-primary));
       }
+
+      .slider__input {
+        width: 3em;
+        font-size: 1em;
+        border: none;
+        margin-right: 0.4em;
+        text-align: center;
+        background: none;
+      }
+
+      .slider__input:focus {
+        outline: none;
+      }
     `
   }
 
@@ -163,8 +180,8 @@ class ThatSlider extends LitElement {
           <div
             class=${classMap({ slider__bar: true })}
             style=${styleMap({
-              left: this.minValue != undefined ? `${this._scale(this.minValue, this.min, this.max, 0, 100)}%` : '',
-              transform: `scaleX(${this._scale(
+              left: this.minValue != undefined ? `${this.scale_(this.minValue, this.min, this.max, 0, 100)}%` : '',
+              transform: `scaleX(${this.scale_(
                 this.maxValue - (this.minValue != undefined ? this.minValue : 0),
                 this.min,
                 this.max,
@@ -177,7 +194,7 @@ class ThatSlider extends LitElement {
             ? html`
                 <div
                   class=${classMap({ 'slider__thumb-container': true })}
-                  style=${styleMap({ left: `${this._scale(this.minValue, this.min, this.max, 0, 100)}%` })}
+                  style=${styleMap({ left: `${this.scale_(this.minValue, this.min, this.max, 0, 100)}%` })}
                 >
                   <div tabindex="0" id="min" class=${classMap({ slider__thumb: true })}></div>
                   <div class=${classMap({ 'slider__focus-ring': true })}></div>
@@ -190,7 +207,7 @@ class ThatSlider extends LitElement {
             : ''}
           <div
             class=${classMap({ 'slider__thumb-container': true })}
-            style=${styleMap({ left: `${this._scale(this.maxValue, this.min, this.max, 0, 100)}%` })}
+            style=${styleMap({ left: `${this.scale_(this.maxValue, this.min, this.max, 0, 100)}%` })}
           >
             <div tabindex="0" id="max" class=${classMap({ slider__thumb: true })}></div>
             <div class=${classMap({ 'slider__focus-ring': true })}></div>
@@ -201,11 +218,21 @@ class ThatSlider extends LitElement {
           </div>
         </div>
       </div>
+      <input
+        .value=${this.currentThumb_ ? this.maxValue : this.minValue}
+        class=${classMap({ slider__input: true })}
+        style=${styleMap({ width: `${String(this.step + this.max).length + (this.min < 0 ? 1.5 : 1)}ex` })}
+        @change=${event => {
+          const newValue = Number(event.srcElement.value)
+          if (!isNaN(newValue)) this.updateValue_(newValue)
+          this.requestUpdate(this.currentThumb_ ? 'maxValue' : 'minValue')
+        }}
+      />
     `
   }
 
   firstUpdated(changedProperties) {
-    this._setupEventListeners()
+    this.setupEventListeners_()
   }
 
   updated(changedProperties) {
@@ -226,17 +253,33 @@ class ThatSlider extends LitElement {
     }
   }
 
-  _scale(number, inMin, inMax, outMin, outMax) {
+  scale_(number, inMin, inMax, outMin, outMax) {
     return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin
   }
 
-  _setupEventListeners() {
+  updateValue_(newValue) {
+    this[this.currentThumb_ ? 'maxValue' : 'minValue'] = parseFloat(newValue.toPrecision(12))
+
+    if ((this.currentThumb_ ? this.maxValue : this.minValue) > this.max)
+      this[this.currentThumb_ ? 'maxValue' : 'minValue'] = this.max
+    if ((this.currentThumb_ ? this.maxValue : this.minValue) < this.min)
+      this[this.currentThumb_ ? 'maxValue' : 'minValue'] = this.min
+
+    if (
+      this[this.currentThumb_ ? 'maxValue' : 'minValue'] == this.max ||
+      this[this.currentThumb_ ? 'maxValue' : 'minValue'] == this.min
+    )
+      return
+
+    this.dispatchEvent(new Event('change'))
+  }
+
+  setupEventListeners_() {
     const that = this
     const sliderElem = this.shadowRoot.getElementById('slider')
     const trackElem = this.shadowRoot.getElementById('track')
     const minThumbElem = this.shadowRoot.getElementById('min')
     const maxThumbElem = this.shadowRoot.getElementById('max')
-    let currentThumb = true
 
     const getMousePos = event => {
       return event.type == 'touchmove' || event.type == 'touchstart' ? event.targetTouches[0].pageX : event.pageX
@@ -252,12 +295,12 @@ class ThatSlider extends LitElement {
         window.setTimeout(() => {
           minThumbElem.focus()
         }, 0)
-        currentThumb = false
+        this.currentThumb_ = false
       } else {
         window.setTimeout(() => {
           maxThumbElem.focus()
         }, 0)
-        currentThumb = true
+        this.currentThumb_ = true
       }
     }
 
@@ -306,9 +349,9 @@ class ThatSlider extends LitElement {
         event.preventDefault()
         updateClosestThumb(event)
         const newValue =
-          (currentThumb ? this.maxValue : this.minValue) +
+          (this.currentThumb_ ? this.maxValue : this.minValue) +
           (-event.deltaY > 0 ? this.step : -this.step) * (event.shiftKey ? 10 : 1)
-        updateValue(newValue)
+        this.updateValue_(newValue)
       }
     }
 
@@ -319,54 +362,45 @@ class ThatSlider extends LitElement {
         )
       )
         return
+
       event.preventDefault()
-      if (event.key == 'Escape') {
-        currentThumb ? maxThumbElem.blur() : minThumbElem.blur()
-        return
+
+      let stepMultiplier = event.shiftKey ? 10 : 1
+
+      switch (event.key) {
+        case 'Escape':
+          this.currentThumb_ ? maxThumbElem.blur() : minThumbElem.blur()
+          return
+
+        case 'Home':
+          this.currentThumb_ ? (this.maxValue = this.min) : (this.minValue = this.min)
+          return
+
+        case 'End':
+          this.currentThumb_ ? (this.maxValue = this.max) : (this.minValue = this.max)
+          return
+
+        case 'ArrowRight':
+        case 'ArrowUp':
+          break
+
+        case 'ArrowLeft':
+        case 'ArrowDown':
+          stepMultiplier *= -1
+          break
+
+        case 'PageUp':
+          stepMultiplier *= 10
+          break
+
+        case 'PageDown':
+          stepMultiplier *= -10
+          break
       }
 
-      if (event.key == 'Home') {
-        currentThumb ? (this.maxValue = this.min) : (this.minValue = this.min)
-      } else if (event.key == 'End') {
-        currentThumb ? (this.maxValue = this.max) : (this.minValue = this.max)
-      } else {
-        let stepMultiplier = event.shiftKey ? 10 : 1
-        switch (event.key) {
-          // case 'ArrowRight':
-          // case 'ArrowUp':
-          //   break
+      const stepAmount = this.step * stepMultiplier
 
-          case 'ArrowLeft':
-          case 'ArrowDown':
-            stepMultiplier *= -1
-            break
-
-          case 'PageUp':
-            stepMultiplier *= 10
-            break
-
-          case 'PageDown':
-            stepMultiplier *= -10
-            break
-        }
-
-        const stepAmount = this.step * stepMultiplier
-
-        updateValue(this[currentThumb ? 'maxValue' : 'minValue'] + stepAmount)
-      }
-
-      this.dispatchEvent(new Event('change'))
-    }
-
-    const updateValue = newValue => {
-      if (newValue > this.max || newValue < this.min) return
-
-      this[currentThumb ? 'maxValue' : 'minValue'] = parseFloat(newValue.toPrecision(12))
-
-      if ((currentThumb ? this.maxValue : this.minValue) > this.max)
-        this[currentThumb ? 'maxValue' : 'minValue'] = this.max
-      if ((currentThumb ? this.maxValue : this.minValue) < this.min)
-        this[currentThumb ? 'maxValue' : 'minValue'] = this.min
+      this.updateValue_(this[this.currentThumb_ ? 'maxValue' : 'minValue'] + stepAmount)
     }
 
     const handleMove = event => {
@@ -381,22 +415,16 @@ class ThatSlider extends LitElement {
       } else if (pos >= trackElem.clientWidth) {
         newValue = that.max
       } else {
-        newValue = that._scale(pos / trackElem.clientWidth, 0, 1, that.min, that.max)
+        newValue = that.scale_(pos / trackElem.clientWidth, 0, 1, that.min, that.max)
       }
 
-      that[currentThumb ? 'maxValue' : 'minValue'] = parseFloat(
+      that[this.currentThumb_ ? 'maxValue' : 'minValue'] = parseFloat(
         (that.step == 0 ? newValue : Math.ceil(newValue / that.step) * that.step).toPrecision(12),
       )
     }
 
     if (minThumbElem) {
       minThumbElem.addEventListener('keydown', handleKeyDown)
-      minThumbElem.addEventListener('focus', () => {
-        currentThumb = false
-      })
-      maxThumbElem.addEventListener('focus', () => {
-        currentThumb = true
-      })
     }
     maxThumbElem.addEventListener('keydown', handleKeyDown)
     sliderElem.addEventListener('mousedown', handleMouseDown)
