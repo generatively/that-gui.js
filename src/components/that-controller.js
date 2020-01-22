@@ -6,13 +6,6 @@ import reset from '../images/reset.svg'
 import settings from '../images/settings.svg'
 
 class ThatController extends LitElement {
-  constructor() {
-    super()
-    this.minimise = false
-    this.actions = []
-    this.options = []
-  }
-
   static get properties() {
     return {
       path: { type: String },
@@ -24,7 +17,6 @@ class ThatController extends LitElement {
       tags: { type: Array },
       actions: { type: Array },
       minimise: { type: Boolean },
-      color: { type: String },
       value: {},
       initialValue: {},
       min: { type: Number },
@@ -173,6 +165,22 @@ class ThatController extends LitElement {
       }
     `
   }
+  
+  constructor() {
+    super()
+    this.path = 'path'
+    this.key = 'key'
+    this.label = 'label'
+    this.object = {}
+    this.gui = {}
+    this.type = 'number'
+    this.minimise = false
+    this.tags = []
+    this.actions = []
+    this.minimise = false
+    this.icon = ''
+    this.options = []
+  }
 
   render() {
     return html`
@@ -273,25 +281,46 @@ class ThatController extends LitElement {
   }
 
   firstUpdated(changedProperties) {
-    if (changedProperties.has('gui')) this.setupEventListeners()
+    if (changedProperties.has('value')) this.initialValue = this.value
 
-    if (changedProperties.has('value') && !this.type.includes('function')) {
-      this.actions = [
-        ...this.actions,
-        [
-          controller => {
-            controller.updateValue(controller.initialValue)
-          },
-          reset,
-        ],
-        [
-          controller => {
-            console.log(controller.value)
-          },
-          settings,
-        ],
-      ]
+    if (changedProperties.has('type')) {
+      switch (this.type) {
+        case 'range':
+          if (!changedProperties.has('value')) this.value = [0, 1]
+        case 'number':
+          if (!changedProperties.has('min')) this.min = 0
+          if (!changedProperties.has('max'))
+            this.max = this.initialValue > 1 ? Math.pow(10, this.initialValue.toString().length) : 1
+          if (!changedProperties.has('step')) this.step = this.initialValue > 1 ? 1 : 0.001
+          break
+
+        default:
+          if (!changedProperties.has('min')) this.min = 0
+          if (!changedProperties.has('max'))
+            this.max = 0
+          if (!changedProperties.has('step')) this.step = 0
+      }
+
+      if (!this.type.includes('function')) {
+        this.actions = [
+          ...this.actions,
+          [
+            controller => {
+              controller.updateValue(controller.initialValue)
+            },
+            reset,
+          ],
+          [
+            controller => {
+              console.log(controller.value)
+            },
+            settings,
+          ],
+        ]
+      }
     }
+
+    if (changedProperties.has('gui')) this.setupEventListeners()
   }
 
   setupEventListeners() {
@@ -366,9 +395,9 @@ class ThatController extends LitElement {
       case 'number':
         return html`
           <that-slider
-            .min=${this.min || 0}
-            .max=${this.max || (this.initialValue > 1 ? Math.pow(10, this.initialValue.toString().length) : 1)}
-            .step=${this.step || (this.initialValue > 1 ? 1 : 0.001)}
+            .min=${this.min}
+            .max=${this.max}
+            .step=${this.step}
             .maxValue=${this.value}
             .label=${this.label}
             @change=${event => {
@@ -381,9 +410,9 @@ class ThatController extends LitElement {
       case 'range':
         return html`
           <that-slider
-            .min=${this.min || 0}
-            .max=${this.max || (this.initialValue > 1 ? Math.pow(10, this.initialValue.toString().length) : 1)}
-            .step=${this.step || (this.initialValue > 1 ? 1 : 0.001)}
+            .min=${this.min}
+            .max=${this.max}
+            .step=${this.step}
             .minValue=${this.value[0]}
             .maxValue=${this.value[1]}
             .label=${this.label}
@@ -413,7 +442,7 @@ class ThatController extends LitElement {
       case 'menu':
         return html`
           <that-menu
-            .value=${this.value}
+            .value=${String(this.value)}
             .label=${this.label}
             .options=${this.options}
             @change=${event => {
@@ -426,7 +455,7 @@ class ThatController extends LitElement {
       case 'boolean':
         return html`
           <that-checkbox
-            .value=${this.value}
+            .value=${Boolean(this.value)}
             .label=${this.label}
             @change=${event => {
               this.updateValue(event.srcElement.value)
@@ -438,7 +467,7 @@ class ThatController extends LitElement {
       case 'function':
         type.shift()
         return html`
-          <that-button @click=${this.value} .icon=${this.icon} .type=${type}>${this.label}</that-button>
+          <that-button @click=${Function(this.value)} .icon=${this.icon} .type=${type}>${this.label}</that-button>
         `
       case 'functionArray':
         const buttons = []

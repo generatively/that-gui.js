@@ -1,16 +1,13 @@
 {
-  "name": "gui",
+  "name": "that-gui",
   "version": "1.0.0",
   "description": "simple js gui",
   "module": "./src/that-gui.js",
   "scripts": {
-    "dev": "parcel src/index.html --out-dir dev",
-    "build": "parcel build src/index.html",
-    "prod": "parcel build src/that-gui.js"
+    "dev": "parcel ./src/index.html",
+    "build": "parcel build ./src/index.html",
+    "prod": "parcel build ./src/that-gui.js --out-dir ./lib"
   },
-  "parcelCleanPaths": [
-    "dist"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Lucas-RS/gui.git"
@@ -21,13 +18,12 @@
     "url": "https://github.com/Lucas-RS/gui/issues"
   },
   "homepage": "https://github.com/Lucas-RS/gui#readme",
-  "devDependencies": {
-    "parcel-bundler": "^1.12.4"
-  },
+  "devDependencies": {},
   "dependencies": {
     "lit-element": "^2.2.1"
   },
   "browserslist": [
     "> 5%"
-  ]
+  ],
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" }
 }

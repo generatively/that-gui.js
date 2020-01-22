@@ -21,6 +21,7 @@ class ThatCheckbox extends LitElement {
         display: inline-flex;
         vertical-align: middle;
         align-items: center;
+        cursor: pointer;
         --primary: 98, 0, 238;
         --surface: 255, 255, 255;
         --on-primary: 255, 255, 255;
@@ -30,9 +31,9 @@ class ThatCheckbox extends LitElement {
       .checkbox {
         user-select: none;
         position: relative;
-        width: 1.2em;
-        height: 1.2em;
-        margin: 0.9em;
+        width: 1.25em;
+        height: 1.25em;
+        margin: 0.875em;
       }
 
       .checkbox:focus {
@@ -50,9 +51,9 @@ class ThatCheckbox extends LitElement {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%) scale(0);
-        width: 2.8em;
-        height: 2.8em;
-        border-radius: 1.4em;
+        width: 2.8125em;
+        height: 2.8125em;
+        border-radius: 1.4375em;
         background: rgba(var(--primary), 0.188);
         opacity: 0;
       }
@@ -100,8 +101,8 @@ class ThatCheckbox extends LitElement {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 1.2em;
-        height: 1.2em;
+        width: 1.25em;
+        height: 1.25em;
         box-sizing: border-box;
         border: 0.125em solid rgba(var(--on-surface), 0.54);
         border-radius: 0.125em;
@@ -119,8 +120,8 @@ class ThatCheckbox extends LitElement {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 0.8em;
-        height: 0.8em;
+        width: 0.8125em;
+        height: 0.8125em;
       }
 
       .checkbox--checked .checkbox__checkmark {
@@ -132,7 +133,7 @@ class ThatCheckbox extends LitElement {
         stroke: rgb(var(--on-primary));
       }
 
-      .checkbox--checked:focus .checkbox__checkmark-path {
+      .checkbox--ripple.checkbox--checked .checkbox__checkmark-path {
         stroke-dasharray: 1000;
         stroke-dashoffset: 1000;
         animation: dash 5s linear forwards;
