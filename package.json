@@ -1,8 +1,8 @@
 {
   "name": "that-gui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "simple js gui",
-  "module": "./src/that-gui.js",
+  "main": "./src/that-gui.js",
   "scripts": {
     "dev": "parcel ./src/index.html",
     "build": "parcel build ./src/index.html",
