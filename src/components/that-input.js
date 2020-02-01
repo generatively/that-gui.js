@@ -26,7 +26,6 @@ class ThatInput extends LitElement {
         display: inline-block;
         font-size: 1em;
         width: 17.5em;
-        margin: 0 0.3em;
         --primary: 98, 0, 238;
         --on-surface: 0, 0, 0;
       }
@@ -35,6 +34,7 @@ class ThatInput extends LitElement {
         position: relative;
         box-sizing: border-box;
         height: 3.5em;
+        margin: 0 0.3em;
         border-radius: 0.25em 0.25em 0 0;
         border-bottom: 0.0625em solid rgba(var(--on-surface), 0.6);
         background: rgba(var(--on-surface), 0.039);
@@ -68,6 +68,7 @@ class ThatInput extends LitElement {
 
       .text-field__label {
         position: absolute;
+        user-select: none;
         top: 50%;
         left: 0.75em;
         transform: translateY(-50%);
@@ -95,7 +96,7 @@ class ThatInput extends LitElement {
         <input
           .value=${this.value}
           @change=${event => {
-            this.value = event.srcElement.value
+            this.value = event.target.value
             this.dispatchEvent(new Event('change'))
           }}
           class=${classMap({ 'text-field__input': true })}
