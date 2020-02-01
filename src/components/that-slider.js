@@ -223,7 +223,7 @@ class ThatSlider extends LitElement {
         class=${classMap({ slider__input: true })}
         style=${styleMap({ width: `${String(this.step + this.max).length + (this.min < 0 ? 1.5 : 1)}ex` })}
         @change=${event => {
-          const newValue = Number(event.srcElement.value)
+          const newValue = Number(event.target.value)
           if (!isNaN(newValue)) this.updateValue_(newValue)
           this.requestUpdate(this.currentThumb_ ? 'maxValue' : 'minValue')
         }}
