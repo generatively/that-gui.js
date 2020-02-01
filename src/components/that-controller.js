@@ -1,11 +1,15 @@
 import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
 import { styleMap } from 'lit-html/directives/style-map'
-//replace SVGs with divs + animations
-import reset from '../images/reset.svg'
-import settings from '../images/settings.svg'
 
 class ThatController extends LitElement {
+  constructor() {
+    super()
+    this.tags = []
+    this.actions = []
+    this.minimise = false
+  }
+
   static get properties() {
     return {
       path: { type: String },
@@ -16,6 +20,7 @@ class ThatController extends LitElement {
       type: { type: String },
       tags: { type: Array },
       actions: { type: Array },
+      hideActions: { type: Boolean },
       minimise: { type: Boolean },
       value: {},
       initialValue: {},
@@ -32,12 +37,8 @@ class ThatController extends LitElement {
       :host {
         display: block;
         font-size: 1rem;
-        margin-top: 0.5em;
+        margin-bottom: 0.5em;
         transition: font-size 0.2s;
-      }
-
-      ::slotted(that-controller:first-child) {
-        margin-top: 0;
       }
 
       that-input {
@@ -62,12 +63,12 @@ class ThatController extends LitElement {
       }
 
       .controller:not(.controller--elevate).controller--has-children:hover {
-        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
       }
 
       .controller--elevate {
         border: none;
-        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+        box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 3px 3px -2px rgba(0, 0, 0, 0.12), 0 1px 8px 0 rgba(0, 0, 0, 0.2);
       }
 
       .controller--active {
@@ -95,8 +96,9 @@ class ThatController extends LitElement {
         cursor: pointer;
         display: inline-block;
         position: relative;
-        width: 2em;
-        height: 2em;
+        margin-right: 0.6em;
+        width: 1em;
+        height: 1em;
         vertical-align: middle;
       }
 
@@ -147,6 +149,7 @@ class ThatController extends LitElement {
 
       .controller--has-children .controller__children {
         padding: 1em;
+        padding-bottom: 0.5em;
         padding-top: 0;
       }
 
@@ -165,22 +168,6 @@ class ThatController extends LitElement {
       }
     `
   }
-  
-  constructor() {
-    super()
-    this.path = 'path'
-    this.key = 'key'
-    this.label = 'label'
-    this.object = {}
-    this.gui = {}
-    this.type = 'number'
-    this.minimise = false
-    this.tags = []
-    this.actions = []
-    this.minimise = false
-    this.icon = ''
-    this.options = []
-  }
 
   render() {
     return html`
@@ -189,6 +176,7 @@ class ThatController extends LitElement {
         that-button,
         that-input,
         that-menu,
+        that-tabbar,
         that-slider,
         that-checkbox {
           --primary: ${this.gui.theme.primary};
@@ -252,41 +240,45 @@ class ThatController extends LitElement {
           >
             ${this.appendForm()}
           </div>
-          ${this.type != 'title'
-            ? html`
+          ${this.hideActions
+            ? ''
+            : html`
                 <div class=${classMap({ controller__actions: true })}>
                   ${this.actions.map(
-                    action => html`
-                      <img
-                        src=${action[1]}
-                        class=${classMap({ 'controller__action-item': true })}
-                        @click=${() => {
-                          action[0](this)
-                        }}
-                      />
-                    `,
+                    action =>
+                      html`
+                        <div
+                          class=${classMap({ 'controller__action-item': true })}
+                          @click=${() => {
+                            action[0](this)
+                          }}
+                        >
+                          ${typeof action[1] == 'object'
+                            ? action[1]
+                            : html`
+                                <img src=${action[1]} />
+                              `}
+                        </div>
+                      `,
                   )}
                 </div>
-              `
-            : ''}
+              `}
         </div>
         <div
           id="children"
           class=${classMap({ controller__children: true, 'controller__children--minimise': this.minimise })}
         >
-          <slot></slot>
+          <slot name=${this.type == 'tabswitch' ? this.value : ''}></slot>
         </div>
       </div>
     `
   }
 
   firstUpdated(changedProperties) {
-    if (changedProperties.has('value')) this.initialValue = this.value
+    this.initialValue = this.value
 
     if (changedProperties.has('type')) {
       switch (this.type) {
-        case 'range':
-          if (!changedProperties.has('value')) this.value = [0, 1]
         case 'number':
           if (!changedProperties.has('min')) this.min = 0
           if (!changedProperties.has('max'))
@@ -294,44 +286,65 @@ class ThatController extends LitElement {
           if (!changedProperties.has('step')) this.step = this.initialValue > 1 ? 1 : 0.001
           break
 
+        case 'tabswitch':
+          if (!changedProperties.has('hideActions')) this.hideActions = true
+          break
+
         default:
           if (!changedProperties.has('min')) this.min = 0
-          if (!changedProperties.has('max'))
-            this.max = 0
+          if (!changedProperties.has('max')) this.max = 0
           if (!changedProperties.has('step')) this.step = 0
       }
 
-      if (!this.type.includes('function')) {
+      if (!['title'].includes(this.type) && !this.type.includes('function')) {
         this.actions = [
           ...this.actions,
           [
             controller => {
               controller.updateValue(controller.initialValue)
             },
-            reset,
+            html`
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
+                <path
+                  d="M72,36A36,36,0,0,1,0,36H3.79a32.11,32.11,0,1,0,9.47-22.73L16.92,17H6.82V6.85l3.66,3.67a36.18,36.18,0,0,1,51,0A36.55,36.55,0,0,1,72,36Z"
+                />
+              </svg>
+            `,
           ],
           [
             controller => {
               console.log(controller.value)
             },
-            settings,
+            html`
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
+                <path
+                  d="M72,41.87V30.13H65.33a31.65,31.65,0,0,0-4.4-10.8l4.54-4.53-8.4-8.4-4.54,4.53a28.55,28.55,0,0,0-10.8-4.4V0H30V6.53a31.85,31.85,0,0,0-10.8,4.4L14.67,6.4,6.4,14.67l4.53,4.53A28.62,28.62,0,0,0,6.53,30H0V41.73H6.53a31.77,31.77,0,0,0,4.4,10.8L6.4,57.07l8.4,8.4,4.53-4.54a28.36,28.36,0,0,0,10.8,4.4V72H41.87V65.33a31.65,31.65,0,0,0,10.8-4.4l4.53,4.54,8.4-8.4-4.53-4.54a28.55,28.55,0,0,0,4.4-10.8ZM36,55.73A19.8,19.8,0,1,1,55.73,35.87h0A19.71,19.71,0,0,1,36.16,55.73H36Z"
+                />
+              </svg>
+            `,
           ],
         ]
       }
     }
 
-    if (changedProperties.has('gui')) this.setupEventListeners()
+    this.updateComplete.then(() => {
+      if (changedProperties.has('gui')) this.setupEventListeners()
+    })
+  }
+
+  updated(changedProperties) {
+    if (changedProperties.has('value')) this.dispatchEvent(new Event('change'))
   }
 
   setupEventListeners() {
     const containerElem = this.shadowRoot.getElementById('controller')
-    const activeLeftPosition = -0.5 * (this.gui.container.shadowRoot.firstElementChild.clientWidth - this.clientWidth)
+    const activeLeftPosition = 1 - this.path.split('.').length
 
     const setActive = active => {
       if (active && this.hasChildNodes() && !this.minimise) {
         containerElem.classList.add('controller--active')
         containerElem.style.width = `${this.gui.container.shadowRoot.firstElementChild.clientWidth}px`
-        containerElem.style.left = `${activeLeftPosition}px`
+        containerElem.style.left = `${activeLeftPosition}em`
       } else {
         containerElem.classList.remove('controller--active')
         containerElem.style.width = ''
@@ -401,7 +414,7 @@ class ThatController extends LitElement {
             .maxValue=${this.value}
             .label=${this.label}
             @change=${event => {
-              this.updateValue(Number(event.srcElement.maxValue))
+              this.updateValue(Number(event.target.maxValue))
             }}
             style=${styleMap({ width: 'initial' })}
           ></that-slider>
@@ -417,7 +430,7 @@ class ThatController extends LitElement {
             .maxValue=${this.value[1]}
             .label=${this.label}
             @change=${event => {
-              this.updateValue([Number(event.srcElement.minValue), Number(event.srcElement.maxValue)])
+              this.updateValue([Number(event.target.minValue), Number(event.target.maxValue)])
             }}
             style=${styleMap({ width: 'initial' })}
           ></that-slider>
@@ -448,8 +461,22 @@ class ThatController extends LitElement {
             @change=${event => {
               this.updateValue(event.srcElement.value)
             }}
-            style=${styleMap({ width: 'calc(100% - 0.6em)' })}
+            style=${styleMap({ width: '100%' })}
           ></that-menu>
+        `
+
+      case 'tabs':
+      case 'tabswitch':
+        return html`
+          <that-tabbar
+            .value=${String(this.value)}
+            .label=${this.label}
+            .options=${this.options}
+            @change=${event => {
+              this.updateValue(event.srcElement.value)
+            }}
+            style=${styleMap({ width: '100%' })}
+          ></that-tabbar>
         `
 
       case 'boolean':
@@ -496,6 +523,15 @@ class ThatController extends LitElement {
 
       case 'title':
         return this.value != undefined && typeof this.value != 'object' ? this.value : this.label
+
+      case 'color':
+        return html`
+          <that-color-picker
+            .value=${this.value}
+            .label=${this.label}
+            .options=${this.options ? this.options : []}
+          ></that-color-picker>
+        `
 
       default:
         return html`
