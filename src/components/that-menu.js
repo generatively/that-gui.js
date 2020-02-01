@@ -1,6 +1,5 @@
 import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
-import { styleMap } from 'lit-html/directives/style-map'
 
 class ThatMenu extends LitElement {
   constructor() {
@@ -26,7 +25,6 @@ class ThatMenu extends LitElement {
         display: inline-block;
         font-size: 1em;
         width: 17.5em;
-        margin: 0 0.3em;
         --primary: 98, 0, 238;
         --surface: 255, 255, 255;
         --on-surface: 0, 0, 0;
@@ -36,6 +34,7 @@ class ThatMenu extends LitElement {
         position: relative;
         box-sizing: border-box;
         height: 3.5em;
+        margin: 0 0.3em;
         border-radius: 0.25em 0.25em 0 0;
         border-bottom: 0.0625em solid rgba(var(--on-surface), 0.6);
         background: rgba(var(--on-surface), 0.039);
@@ -69,6 +68,7 @@ class ThatMenu extends LitElement {
 
       .menu__label {
         position: absolute;
+        user-select: none;
         top: 50%;
         left: 0.75em;
         transform: translateY(-50%);
@@ -152,7 +152,6 @@ class ThatMenu extends LitElement {
     return html`
       <div
         tabindex="0"
-        id="menu"
         class=${classMap({ menu: true })}
         @click=${() => {
           this.open = !this.open
@@ -168,15 +167,23 @@ class ThatMenu extends LitElement {
 
           switch (event.key) {
             case 'Escape':
-              this.shadowRoot.getElementById('menu').blur()
+              this.blur()
+              return
+
+            case 'End':
+              this.currentIndex_ = this.options.length - 1
+              return
+
+            case 'Home':
+              this.currentIndex_ = 0
               return
 
             case 'ArrowUp':
-              this.currentIndex_--
+              if (this.currentIndex_ > 0) this.currentIndex_--
               return
 
             case 'ArrowDown':
-              this.currentIndex_++
+              if (this.currentIndex_ < this.options.length - 1) this.currentIndex_++
               return
 
             case 'Enter':
