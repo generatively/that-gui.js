@@ -174,7 +174,7 @@ class ThatCheckbox extends LitElement {
         <div
           class=${classMap({ 'checkbox__active-ring': true })}
           @animationend=${event => {
-            event.srcElement.parentElement.classList.remove('checkbox--ripple')
+            event.target.parentElement.classList.remove('checkbox--ripple')
           }}
         ></div>
         <div class=${classMap({ checkbox__box: true })}></div>
@@ -192,9 +192,9 @@ class ThatCheckbox extends LitElement {
 
   handleChange(event) {
     this.value = !this.value
-    event.srcElement.classList.remove('checkbox--ripple')
-    void event.srcElement.offsetWidth
-    event.srcElement.classList.add('checkbox--ripple')
+    event.target.classList.remove('checkbox--ripple')
+    void event.target.offsetWidth
+    event.target.classList.add('checkbox--ripple')
   }
 }
 
