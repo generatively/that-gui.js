@@ -1,13 +1,11 @@
 {
   "name": "that-gui",
   "version": "1.0.1",
-  "description": "simple js gui",
+  "description": "A simple GUI for manipulating JavaScript objects.",
   "main": "./src/that-gui.js",
-  "scripts": {
-    "dev": "parcel ./src/index.html",
-    "build": "parcel build ./src/index.html",
-    "prod": "parcel build ./src/that-gui.js --out-dir ./lib"
-  },
+  "files": [
+    "/src/"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Lucas-RS/gui.git"
@@ -18,7 +16,6 @@
     "url": "https://github.com/Lucas-RS/gui/issues"
   },
   "homepage": "https://github.com/Lucas-RS/gui#readme",
-  "devDependencies": {},
   "dependencies": {
     "lit-element": "^2.2.1"
   },
