@@ -27,74 +27,130 @@ export class ThatGui {
     }
   }
 
+  updateAllControllers() {
+    for (const elem in this.controllerElements) this.controllerElements[elem].requestUpdate()
+  }
+
   add(objects) {
-    for (let key in objects) {
+    for (const key in objects) {
       this.objects[key] = objects[key]
       this.addController(key, objects)
     }
   }
 
   addController(key, parentObject, pathKey) {
-    if (!key.startsWith('_')) {
-      let value
-      const object = parentObject[key]
-      const controllerElement = document.createElement('that-controller')
+    if (key.startsWith('_')) return
 
-      controllerElement.gui = this
+    const object = parentObject[key]
+    const controllerElement = document.createElement('that-controller')
+    let properties
 
-      if (pathKey != undefined) {
-        this.controllerElements[pathKey].appendChild(controllerElement)
-        pathKey = pathKey + '.' + key
-      } else {
-        this.container.appendChild(controllerElement)
-        pathKey = key
-      }
+    controllerElement.gui = this
 
-      this.controllerElements[pathKey] = controllerElement
+    if (pathKey != undefined) {
+      if (this.controllerElements[pathKey]) this.controllerElements[pathKey].appendChild(controllerElement)
+      pathKey = `${pathKey}.${key}`
+    } else {
+      this.container.appendChild(controllerElement)
+      pathKey = key
+    }
 
-      if (Array.isArray(object)) {
-        value = [...object]
-      } else if (typeof object === 'object') {
-        for (let childKey in object) {
-          if (!childKey.startsWith('_')) {
-            this.addController(childKey, object, pathKey)
+    this.controllerElements[pathKey] = controllerElement
+
+    properties = {
+      label: key,
+      ...parentObject.__all,
+      ...parentObject[`_${key}`],
+      object: parentObject,
+      path: pathKey,
+      key: key
+    }
+
+    if (typeof object == 'object') {
+      let type = 'object'
+      if (properties.type == undefined) {
+        if (Array.isArray(object)) {
+          type = typeof object[0]
+          for (const item of object) {
+            if (type != typeof item) {
+              type = 'object'
+              break
+            }
           }
         }
+      } else {
+        type = properties.type
+      }
+
+      if (type == 'object') {
+        for (const childKey in object) this.addController(childKey, object, pathKey)
+
         if (object['__value'] != undefined) {
-          value = object['__value']
+          properties.value = object['__value']
         }
+      } else if (type == 'tabswitch') {
+        const keys = Object.keys(object)
+        properties.options = keys
+        properties.value = keys[0]
+
+        for (const childKey in object) {
+          const childObject = object[childKey]
+          for (const grandChildKey in childObject) {
+            const elem = this.addController(grandChildKey, childObject, `${pathKey}.${childKey}`)
+            if (elem) {
+              controllerElement.append(elem)
+              elem.slot = childKey
+            }
+          }
+        }
+      } else if (type == 'color') {
+        properties.value = {...object}
       } else {
-        value = object
+        properties.value = [...object]
+        if (!properties.type) properties.type = `${type}Array`
       }
-
-      if (value != undefined) {
-        controllerElement.value = value
-        controllerElement.type = typeof value
-      } else {
-        controllerElement.type = 'title'
-      }
-
-      controllerElement.object = parentObject
-      controllerElement.path = pathKey
-      controllerElement.key = key
-      controllerElement.label = key
-
-      if (parentObject.__all != undefined) {
-        for (const prop in parentObject.__all) {
-          controllerElement[prop] = parentObject.__all[prop]
-        }
-      }
-
-      if (parentObject['_' + key] != undefined) {
-        for (const prop in parentObject['_' + key]) {
-          controllerElement[prop] = parentObject['_' + key][prop]
-        }
-      }
+    } else {
+      properties.value = object
     }
+
+    if (!properties.type) properties.type = properties.value != undefined ? typeof properties.value : 'title'
+    
+    for (const prop in properties) controllerElement[prop] = properties[prop]
+
+    return controllerElement
   }
 
-  updateAllControllers() {
-    for (let elem in this.controllerElements)
-      this.controllerElements[elem].requestUpdate()
+  refreshControllers(startPointKey) {
+    if (startPointKey.length > 0) {
+      const topControllerIndex = Array.prototype.indexOf.call(
+        this.controllerElements[startPointKey].parentNode.children,
+        this.controllerElements[startPointKey],
+      )
+
+      for (const key in this.controllerElements) {
+        if (key.includes(startPointKey)) {
+          this.controllerElements[key].remove()
+          delete this.controllerElements[key]
+        }
+      }
+
+      const path = startPointKey.split('.')
+      const key = path.pop()
+      let pathKey, parentNode
+      if (path.length > 0) {
+        pathKey = path.join('.')
+        parentNode = this.controllerElements[pathKey]
+      } else {
+        parentNode = this.container
+      }
+
+      let controllersObject = this.objects
+      path.forEach(dir => {
+        controllersObject = controllersObject[dir]
+      })
+
+      this.addController(key, controllersObject, pathKey)
+      parentNode.insertBefore(parentNode.lastChild, parentNode.children[topControllerIndex])
+    }
   }
 }
