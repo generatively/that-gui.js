@@ -51,12 +51,13 @@ class ThatButton extends LitElement {
         outline: none;
       }
 
-      .button:hover {
-        background: rgb(var(--primary), 0.122);
+      .button:hover,
+      .button:focus {
+        background: rgba(var(--primary), 0.122);
       }
 
       .button:active {
-        background: rgb(var(--primary), 0.243);
+        background: rgba(var(--primary), 0.243);
       }
 
       .button--shaped {
@@ -73,8 +74,9 @@ class ThatButton extends LitElement {
         color: rgb(var(--on-primary));
       }
 
-      .button--fill:hover {
-        background: rgb(var(--primary), 0.878);
+      .button--fill:hover,
+      .button--fill:focus {
+        background: rgba(var(--primary), 0.878);
       }
 
       .button--fill:active {
@@ -99,6 +101,7 @@ class ThatButton extends LitElement {
       }
 
       .icon {
+        display: inline-block;
         padding: 0.5625em 0.25em 0.5625em 0;
         vertical-align: bottom;
         height: 1.125em;
@@ -119,12 +122,27 @@ class ThatButton extends LitElement {
           'button--shaped': this.shaped,
           'button--has-icon': this.icon != undefined,
         })}
+        @keydown=${event => {
+          if (![' ', 'Enter'].includes(event.key)) return
+          event.preventDefault()
+        }}
+        @keyup=${event => {
+          if (![' ', 'Enter'].includes(event.key)) return
+          event.preventDefault()
+          this.dispatchEvent(new Event('click'))
+        }}
       >
         ${this.icon
           ? html`
-              <img src=${this.icon} class=${classMap({ icon: true })} />
+              <div class=${classMap({ icon: true })}>
+                ${typeof this.icon == 'object'
+                  ? this.icon
+                  : html`
+                      <img src=${this.icon} />
+                    `}
+              </div>
             `
-          : ``}
+          : ''}
         <span class=${classMap({ text: true })}><slot></slot></span>
       </div>
     `
