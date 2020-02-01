@@ -157,13 +157,19 @@ class ThatController extends LitElement {
         display: none;
       }
 
-      @media (max-width: 1000px), (hover: none) {
+      @media (hover: none) {
         .controller--active {
           transition-delay: 0.2s;
         }
+        
+        @media (max-width: 1000px) {
+          :host {
+            font-size: 2rem;
+          }
 
-        :host {
-          font-size: 2rem;
+          that-color-picker {
+            width: 12.5em;
+          }
         }
       }
     `
@@ -178,7 +184,8 @@ class ThatController extends LitElement {
         that-menu,
         that-tabbar,
         that-slider,
-        that-checkbox {
+        that-checkbox,
+        that-color-picker {
           --primary: ${this.gui.theme.primary};
           --primary-variant: ${this.gui.theme.primaryVariant};
           --secondary: ${this.gui.theme.secondary};

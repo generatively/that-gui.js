@@ -5,17 +5,6 @@ import { styleMap } from 'lit-html/directives/style-map'
 class ThatColorPicker extends LitElement {
   constructor() {
     super()
-    this.r = 255
-    this.g = 255
-    this.b = 255
-    this.h = 0
-    this.s = 0
-    this.l = 100
-    this.hex = '#ffffff'
-    this.value = { r: 255, g: 255, b: 255 }
-    this.label = ''
-    this.options = []
-    this.type = 'rgb'
     this.open = false
   }
 
@@ -43,7 +32,7 @@ class ThatColorPicker extends LitElement {
         position: relative;
         display: inline-block;
         margin: 0 0.3em;
-        width: 20em;
+        width: 19.5em;
         font-size: 1em;
         cursor: pointer;
         --primary: 98, 0, 238;
@@ -57,7 +46,7 @@ class ThatColorPicker extends LitElement {
 
       .color__main {
         padding: 1em;
-        height: 2.5em;
+        height: 3em;
         border-radius: 0.25em 0.25em 0 0;
         background: rgb(var(--surface));
         transition: background-color 0.2s;
@@ -83,8 +72,9 @@ class ThatColorPicker extends LitElement {
 
       .color__dot {
         --color: var(--primary);
-        height: 2.5em;
-        width: 2.5em;
+        box-sizing: border-box;
+        height: 3em;
+        width: 3em;
         border-radius: 50%;
         border: 0.125em solid rgba(var(--on-surface), 0.1);
         background: rgb(var(--color));
@@ -131,8 +121,7 @@ class ThatColorPicker extends LitElement {
 
   render() {
     const getCSSColor = value => {
-      const v = this.convert_(value, this.type, 'rgb')
-      return `${v.r}, ${v.g}, ${v.b + (v.a ? ', ' + v.a : '')}`
+      return `${Math.round(this.r * 255)}, ${Math.round(this.g * 255)}, ${Math.round(this.b * 255)}, ${this.a}`
     }
 
     return html`
@@ -163,7 +152,7 @@ class ThatColorPicker extends LitElement {
           ${this.options.length > 0
             ? html`
                 <div class=${classMap({ 'color__options-container': true })}>
-                  ${this.options.map((option, index) => {
+                  ${this.options.map(option => {
                     return html`
                       <div
                         class=${classMap({ color__dot: true, 'color__dot--swatch-option': true })}
@@ -193,125 +182,145 @@ class ThatColorPicker extends LitElement {
   }
 
   updated(changedProperties) {
-    if (changedProperties.has('value')) this.dispatchEvent(new Event('change'))
+    if (changedProperties.has('value')) {
+      switch (this.type) {
+        case 'hex':
+          this.hex = this.value
+          break
+
+        case 'rgb':
+          this.r = this.value.r / 255
+          this.g = this.value.g / 255
+          this.b = this.value.b / 255
+          this.a = this.value.a || 1
+          break
+
+        case 'hsl':
+          this.h = this.value.h / 360
+          this.s = this.value.s / 100
+          this.l = this.value.l / 100
+          this.a = this.value.a || 1
+          break
+      }
+
+      this.dispatchEvent(new Event('change'))
+    }
+
+    if (changedProperties.has('r') || changedProperties.has('g') || changedProperties.has('b')) {
+      this.hex =
+        '#' +
+        Math.round(this.r * 255)
+          .toString(16)
+          .padStart(2, '0') +
+        Math.round(this.g * 255)
+          .toString(16)
+          .padStart(2, '0') +
+        Math.round(this.b * 255)
+          .toString(16)
+          .padStart(2, '0') +
+        (Math.round(this.a * 255) < 255
+          ? Math.round(this.a * 255)
+              .toString(16)
+              .padStart(2, '0')
+          : '')
+
+      const rgbArray = [this.r, this.g, this.b]
+      const min = Math.min(...rgbArray)
+      const max = Math.max(...rgbArray)
+      let h
+      if (min == max) {
+        h = 0
+      } else if (rgbArray.indexOf(max) == 0) {
+        h = (rgbArray[1] - rgbArray[2]) / (max - min)
+      } else if (rgbArray.indexOf(max) == 1) {
+        h = 2 + (rgbArray[2] - rgbArray[0]) / (max - min)
+      } else {
+        h = 4 + (rgbArray[0] - rgbArray[1]) / (max - min)
+      }
+      if (h < 0) h += 6
+
+      this.h = h / 6
+      this.l = (min + max) * 0.5
+      this.s = min == max ? 0 : this.l < 0.5 ? (max - min) / (max + min) : (max - min) / (2 - max - min)
+    }
 
     if (
-      ['value', 'hex', 'r', 'g', 'b', 'h', 's', 'l', 'a'].some(prop => {
+      (changedProperties.has('h') || changedProperties.has('s') || changedProperties.has('l')) &&
+      !['hex', 'r', 'g', 'b', 'a'].some(prop => {
         return changedProperties.has(prop)
       })
     ) {
-      if (this.label == 'hex') console.log(changedProperties)
-
-      if (changedProperties.has('r') || changedProperties.has('g') || changedProperties.has('b')) {
-        this.hex = `#${this.r.toString(16) + this.g.toString(16) + this.b.toString(16)}${this.a ? this.a.toString(16) : ''}`
-      }
-
-      if (changedProperties.has('h') || changedProperties.has('s') || changedProperties.has('l')) {
-        this.r = this.h * 3
-      }
-
-      if (changedProperties.has('hex')) {
-        //updateValue()
-      }
-
-      if (changedProperties.has('a')) {
-        //updateValue()
+      if (this.s == 0) {
+        this.r = this.l
+        this.g = this.l
+        this.b = this.l
+      } else {
+        const temp1 = this.l < 0.5 ? this.l * (this.s + 1) : this.l + this.s - this.l * this.s
+        const temp2 = this.l * 2 - temp1
+        const rgb = { r: this.h + 1 / 3, g: this.h, b: this.h - 1 / 3 }
+        for (const i in rgb) {
+          if (rgb[i] < 0) {
+            rgb[i] += 1
+          } else if (rgb[i] > 1) {
+            rgb[i] -= 1
+          }
+          if (rgb[i] * 6 < 1) {
+            rgb[i] = temp2 + (temp1 - temp2) * rgb[i] * 6
+          } else if (rgb[i] * 2 < 1) {
+            rgb[i] = temp1
+          } else if (rgb[i] * 3 < 2) {
+            rgb[i] = temp2 + (temp1 - temp2) * (2 / 3 - rgb[i]) * 6
+          } else {
+            rgb[i] = temp2
+          }
+        }
+        this.r = rgb.r
+        this.g = rgb.g
+        this.b = rgb.b
       }
     }
-  }
 
-  convert_(value, fromType, toType) {
-    if (fromType == toType) return value
+    if (
+      changedProperties.has('hex') &&
+      !['r', 'g', 'b', 'h', 's', 'l', 'a'].some(prop => {
+        return changedProperties.has(prop)
+      })
+    ) {
+      const valueStringArray = this.hex.slice(1).match(/.{2}/g)
+      this.r = parseInt(valueStringArray[0], 16) / 255
+      this.g = parseInt(valueStringArray[1], 16) / 255
+      this.b = parseInt(valueStringArray[2], 16) / 255
+      this.a = parseFloat((parseInt(valueStringArray[3], 16) / 255).toPrecision(2)) || 1
+    }
 
-    switch (fromType) {
-      case 'hex':
-        const valueStringArray = value.slice(1).match(/.{2}/g)
-        const rgb = {
-          r: parseInt(valueStringArray[0], 16),
-          g: parseInt(valueStringArray[1], 16),
-          b: parseInt(valueStringArray[2], 16),
-          a: valueStringArray[3] ? parseInt(valueStringArray[3], 16) / 255 : 255,
-        }
+    if (
+      ['hex', 'r', 'g', 'b', 'h', 's', 'l', 'a'].some(prop => {
+        return changedProperties.has(prop)
+      })
+    ) {
+      switch (this.type) {
+        case 'hex':
+          this.value = this.hex
+          break
 
-        if (toType == 'hsl') {
-          return this.convert_(rgb, 'rgb', 'hsl')
-        } else if (toType == 'rgb') {
-          return rgb
-        } else {
-          return value
-        }
-
-      case 'rgb':
-        if (toType == 'hex') {
-          return `#${Object.keys(value)
-            .map(key => {
-              return Math.round(value[key] * (key == 'a' ? 255 : 1)).toString(16)
-            })
-            .join('')}`
-        } else if (toType == 'hsl') {
-          const rgbArray = [value.r / 255, value.g / 255, value.b / 255]
-          const min = Math.min(...rgbArray)
-          const max = Math.max(...rgbArray)
-          const l = 100 * ((min + max) * 0.5)
-          const s = 100 * (min == max ? 0 : l < 50 ? (max - min) / (max + min) : (max - min) / (2 - max - min))
-          let h
-          if (min == max) {
-            h = 0
-          } else if (rgbArray.indexOf(max) == 0) {
-            h = (rgbArray[1] - rgbArray[2]) / (max - min)
-          } else if (rgbArray.indexOf(max) == 1) {
-            h = 2 + (rgbArray[2] - rgbArray[0]) / (max - min)
-          } else {
-            h = 4 + (rgbArray[0] - rgbArray[1]) / (max - min)
+        case 'rgb':
+          this.value = {
+            r: Math.round(this.r * 255),
+            g: Math.round(this.g * 255),
+            b: Math.round(this.b * 255),
+            a: this.a || 1,
           }
-          if (h < 0) h += 6
-          h *= 60
+          break
 
-          return { h, s, l, a: value.a || 1 }
-        } else {
-          return value
-        }
-
-      case 'hsl':
-        if (toType == 'hex') {
-          return this.convert_(this.convert_(value, 'hsl', 'rgb'), 'rgb', 'hex')
-        } else if (toType == 'rgb') {
-          if (value.s == 0) {
-            const v = value.l * 2.55
-            return { r: v, g: v, b: v }
-          } else {
-            const h = value.h / 360
-            const s = value.s / 100
-            const l = value.l / 100
-            const temp1 = l < 0.5 ? l * (s + 1) : l + s - l * s
-            const temp2 = l * 2 - temp1
-            const rgb = { r: h + 1 / 3, g: h, b: h - 1 / 3 }
-            for (const i in rgb) {
-              if (rgb[i] < 0) {
-                rgb[i] += 1
-              } else if (rgb[i] > 1) {
-                rgb[i] -= 1
-              }
-              if (rgb[i] * 6 < 1) {
-                rgb[i] = temp2 + (temp1 - temp2) * rgb[i] * 6
-              } else if (rgb[i] * 2 < 1) {
-                rgb[i] = temp1
-              } else if (rgb[i] * 3 < 2) {
-                rgb[i] = temp2 + (temp1 - temp2) * (2 / 3 - rgb[i]) * 6
-              } else {
-                rgb[i] = temp2
-              }
-              rgb[i] = Math.round(rgb[i] * 255)
-            }
-            rgb.a = value.a
-            return rgb
+        case 'hsl':
+          this.value = {
+            h: Math.round(this.h * 360),
+            s: Math.round(this.s * 100),
+            l: Math.round(this.l * 100),
+            a: this.a || 1,
           }
-        } else {
-          return value
-        }
-
-      default:
-        return value
+          break
+      }
     }
   }
 }
