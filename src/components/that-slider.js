@@ -10,7 +10,7 @@ class ThatSlider extends LitElement {
     this.max = 100
     this.step = 0.1
     this.label = ''
-    this.showCurrentValue = true
+    this.hideValueTextField = false
     this.updateContinuously = false
     this.currentThumb_ = true
   }
@@ -25,7 +25,7 @@ class ThatSlider extends LitElement {
       max: { type: Number },
       step: { type: Number },
       label: { type: String },
-      showCurrentValue: { type: Boolean },
+      hideValueTextField: { type: Boolean },
       updateContinuously: { type: Boolean },
       currentThumb_: { type: Boolean },
     }
@@ -220,17 +220,21 @@ class ThatSlider extends LitElement {
           </div>
         </div>
       </div>
-      <input
-        .value=${this.currentThumb_ ? this.maxValue : this.minValue}
-        class=${classMap({ slider__input: true })}
-        style=${styleMap({ width: `${String(this.step + this.max).length + (this.min < 0 ? 1.5 : 1)}ex` })}
-        @change=${event => {
-          const newValue = Number(event.target.value)
-          if (!isNaN(newValue)) this.updateValue_(newValue)
-          this.requestUpdate(this.currentThumb_ ? 'maxValue' : 'minValue')
-          event.target.value = this[this.currentThumb_ ? 'maxValue' : 'minValue']
-        }}
-      />
+      ${this.hideValueTextField
+        ? ''
+        : html`
+            <input
+              .value=${this.currentThumb_ ? this.maxValue : this.minValue}
+              class=${classMap({ slider__input: true })}
+              style=${styleMap({ width: `${String(this.step + this.max).length + (this.min < 0 ? 1.5 : 1)}ex` })}
+              @change=${event => {
+                const newValue = Number(event.target.value)
+                if (!isNaN(newValue)) this.updateValue_(newValue)
+                this.requestUpdate(this.currentThumb_ ? 'maxValue' : 'minValue')
+                event.target.value = this[this.currentThumb_ ? 'maxValue' : 'minValue']
+              }}
+            />
+          `}
     `
   }
 
