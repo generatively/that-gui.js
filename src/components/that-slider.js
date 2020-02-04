@@ -11,6 +11,7 @@ class ThatSlider extends LitElement {
     this.step = 0.1
     this.label = ''
     this.showCurrentValue = true
+    this.updateContinuously = false
     this.currentThumb_ = true
   }
 
@@ -25,6 +26,7 @@ class ThatSlider extends LitElement {
       step: { type: Number },
       label: { type: String },
       showCurrentValue: { type: Boolean },
+      updateContinuously: { type: Boolean },
       currentThumb_: { type: Boolean },
     }
   }
@@ -226,6 +228,7 @@ class ThatSlider extends LitElement {
           const newValue = Number(event.target.value)
           if (!isNaN(newValue)) this.updateValue_(newValue)
           this.requestUpdate(this.currentThumb_ ? 'maxValue' : 'minValue')
+          event.target.value = this[this.currentThumb_ ? 'maxValue' : 'minValue']
         }}
       />
     `
@@ -421,6 +424,8 @@ class ThatSlider extends LitElement {
       that[this.currentThumb_ ? 'maxValue' : 'minValue'] = parseFloat(
         (that.step == 0 ? newValue : Math.ceil(newValue / that.step) * that.step).toPrecision(12),
       )
+
+      if (this.updateContinuously) this.dispatchEvent(new Event('change'))
     }
 
     if (minThumbElem) {
