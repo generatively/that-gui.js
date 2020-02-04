@@ -379,28 +379,13 @@ class ThatController extends LitElement {
       }
     }
 
-    const handleTouchStart = event => {
-      if (
-        event.target == this ||
-        ((!event.target.hasChildNodes() || event.target.minimise) && event.target.parentElement == this)
-      ) {
-        setActive(true)
-        this.addEventListener('touchend', handleTouchEnd)
-      }
-    }
-
-    const handleTouchEnd = end => {
-      if (
-        event.target == this ||
-        ((!event.target.hasChildNodes() || event.target.minimise) && event.target.parentElement == this)
-      ) {
-        setActive(false)
-        this.removeEventListener('touchend', handleTouchEnd)
-      }
-    }
-
     this.addEventListener('mouseover', handleOver)
-    this.addEventListener('touchstart', handleTouchStart)
+    this.addEventListener('focus', event => {
+      setActive(true)
+    })
+    this.addEventListener('blur', event => {
+      setActive(false)
+    })
     this.addEventListener('minimisetoggled', event => {
       setActive(!this.minimise)
       this.minimise
