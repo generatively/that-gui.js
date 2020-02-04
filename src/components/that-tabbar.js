@@ -21,6 +21,7 @@ class ThatTabBar extends LitElement {
     return css`
       :host {
         display: inline-block;
+        width: 100%;
         font-size: 1em;
         cursor: pointer;
         --primary: 98, 0, 238;
