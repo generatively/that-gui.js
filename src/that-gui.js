@@ -3,8 +3,9 @@ import './components'
 export class ThatGui {
   constructor(options) {
     this.container = document.createElement('that-gui')
-    if (options.parentID) {
-      document.getElementById(options.parentID).append(this.container)
+    if (options.parent) {
+      this.container.hasParent = true
+      document.getElementById(options.parent).append(this.container)
     } else {
       document.body.append(this.container)
     }
