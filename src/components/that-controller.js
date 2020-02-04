@@ -482,7 +482,6 @@ class ThatController extends LitElement {
             @change=${event => {
               this.updateValue(event.srcElement.value)
             }}
-            style=${styleMap({ width: '100%' })}
           ></that-tabbar>
         `
 
@@ -537,6 +536,9 @@ class ThatController extends LitElement {
             .value=${this.value}
             .label=${this.label}
             .options=${this.options ? this.options : []}
+            @change=${event => {
+              this.updateValue(event.srcElement.value)
+            }}
           ></that-color-picker>
         `
 
