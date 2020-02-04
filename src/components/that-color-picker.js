@@ -244,7 +244,7 @@ class ThatColorPicker extends LitElement {
       .color__settings {
         position: absolute;
         box-sizing: border-box;
-        top: calc(100% - 0.25em);
+        top: 100%;
         left: 0;
         width: 100%;
         padding: 1em;
