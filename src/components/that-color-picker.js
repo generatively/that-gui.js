@@ -25,31 +25,7 @@ class ThatColorPicker extends LitElement {
   }
 
   get r() {
-    if (this.s == 0) {
-      return this.l
-    } else {
-      const temp1 = this.l < 0.5 ? this.l * (this.s + 1) : this.l + this.s - this.l * this.s
-      const temp2 = this.l * 2 - temp1
-      let r = this.h + 1 / 3
-
-      if (r < 0) {
-        r += 1
-      } else if (r > 1) {
-        r -= 1
-      }
-
-      if (r * 6 < 1) {
-        r = temp2 + (temp1 - temp2) * r * 6
-      } else if (r * 2 < 1) {
-        r = temp1
-      } else if (r * 3 < 2) {
-        r = temp2 + (temp1 - temp2) * (2 / 3 - r) * 6
-      } else {
-        r = temp2
-      }
-
-      return isNaN(r) ? 1 : r
-    }
+    return this.getRGBFromHSL_('r')
   }
 
   set r(value) {
@@ -57,31 +33,7 @@ class ThatColorPicker extends LitElement {
   }
 
   get g() {
-    if (this.s == 0) {
-      return this.l
-    } else {
-      const temp1 = this.l < 0.5 ? this.l * (this.s + 1) : this.l + this.s - this.l * this.s
-      const temp2 = this.l * 2 - temp1
-      let g = this.h
-
-      if (g < 0) {
-        g += 1
-      } else if (g > 1) {
-        g -= 1
-      }
-
-      if (g * 6 < 1) {
-        g = temp2 + (temp1 - temp2) * g * 6
-      } else if (g * 2 < 1) {
-        g = temp1
-      } else if (g * 3 < 2) {
-        g = temp2 + (temp1 - temp2) * (2 / 3 - g) * 6
-      } else {
-        g = temp2
-      }
-
-      return isNaN(g) ? 1 : g
-    }
+    return this.getRGBFromHSL_('g')
   }
 
   set g(value) {
@@ -89,31 +41,7 @@ class ThatColorPicker extends LitElement {
   }
 
   get b() {
-    if (this.s == 0) {
-      return this.l
-    } else {
-      const temp1 = this.l < 0.5 ? this.l * (this.s + 1) : this.l + this.s - this.l * this.s
-      const temp2 = this.l * 2 - temp1
-      let b = this.h - 1 / 3
-
-      if (b < 0) {
-        b += 1
-      } else if (b > 1) {
-        b -= 1
-      }
-
-      if (b * 6 < 1) {
-        b = temp2 + (temp1 - temp2) * b * 6
-      } else if (b * 2 < 1) {
-        b = temp1
-      } else if (b * 3 < 2) {
-        b = temp2 + (temp1 - temp2) * (2 / 3 - b) * 6
-      } else {
-        b = temp2
-      }
-
-      return isNaN(b) ? 1 : b
-    }
+    return this.getRGBFromHSL_('b')
   }
 
   set b(value) {
@@ -174,12 +102,14 @@ class ThatColorPicker extends LitElement {
         if (!this.noAlpha) hsl.a = this.a
         return hsl
 
-      default: 
+      default:
         return '#FFFFFF'
     }
   }
 
   set value(value) {
+    if (value == this.value) return
+
     if (typeof value == 'string') {
       this.type = 'hex'
     } else if (value.r || value.g || value.b) {
@@ -264,7 +194,7 @@ class ThatColorPicker extends LitElement {
         height: 3em;
         width: 3em;
         border-radius: 50%;
-        border: 0.125em solid rgba(var(--on-surface), 0.1);
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
         background: white;
       }
 
@@ -434,6 +364,7 @@ class ThatColorPicker extends LitElement {
   }
 
   setHSLFromRGB_(rgbArray) {
+    if (rgbArray[0] == this.r && rgbArray[1] == this.g && rgbArray[2] == this.b) return
     const min = Math.min(...rgbArray)
     const max = Math.max(...rgbArray)
     const l = (min + max) * 0.5
@@ -451,9 +382,50 @@ class ThatColorPicker extends LitElement {
     if (h < 0) h += 6
     h /= 6
 
-    this.l = l
-    this.s = s
     this.h = h
+    this.s = s
+    this.l = l
+  }
+
+  getRGBFromHSL_(component) {
+    if (this.s == 0) {
+      return this.l
+    } else {
+      const temp1 = this.l < 0.5 ? this.l * (this.s + 1) : this.l + this.s - this.l * this.s
+      const temp2 = this.l * 2 - temp1
+      let value = this.h
+
+      switch (component) {
+        case 'g':
+          break
+
+        case 'r':
+          value += 1 / 3
+          break
+
+        case 'b':
+          value -= 1 / 3
+          break
+      }
+
+      if (value < 0) {
+        value += 1
+      } else if (value > 1) {
+        value -= 1
+      }
+
+      if (value * 6 < 1) {
+        value = temp2 + (temp1 - temp2) * value * 6
+      } else if (value * 2 < 1) {
+        value = temp1
+      } else if (value * 3 < 2) {
+        value = temp2 + (temp1 - temp2) * (2 / 3 - value) * 6
+      } else {
+        value = temp2
+      }
+
+      return isNaN(value) ? 1 : value
+    }
   }
 }
 
