@@ -9,6 +9,7 @@ class ThatColorPicker extends LitElement {
     super()
     this.a = 1
     this.noAlpha = false
+    this.open = false
   }
 
   static get properties() {
@@ -21,6 +22,7 @@ class ThatColorPicker extends LitElement {
       l: { type: Number },
       a: { type: Number },
       noAlpha: { type: Boolean },
+      open: { type: Boolean },
     }
   }
 
@@ -167,6 +169,10 @@ class ThatColorPicker extends LitElement {
         width: 100%;
       }
 
+      that-input {
+        width: calc(100% - 0.6em);
+      }
+
       .color:focus {
         outline: none;
       }
@@ -194,25 +200,17 @@ class ThatColorPicker extends LitElement {
         line-height: 1.2em;
         text-align: left;
         border-radius: 0.25em;
-        transition: background-color 0.2s, padding 0.2s, left 0.2s, transform 0.2s, text-align 0.2s, box-shadow 0.2s;
+        transition: left 0.2s, transform 0.2s, text-align 0.2s, color 0.4s;
       }
 
       .color:focus-within .color__text {
-        padding: 0.5em 0.75em;
-        background: white;
         left: 50%;
         transform: translate(-50%, -50%);
         text-align: center;
-        box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 3px 3px -2px rgba(0, 0, 0, 0.12), 0 1px 8px 0 rgba(0, 0, 0, 0.2);
       }
 
       .color__label {
-        color: rgba(var(--on-surface), 0.7);
-        transition: color 0.2s;
-      }
-
-      .color:focus-within .color__label {
-        color: rgb(var(--primary));
+        opacity: 0.7;
       }
 
       .color__value {
@@ -245,7 +243,6 @@ class ThatColorPicker extends LitElement {
         position: absolute;
         box-sizing: border-box;
         top: 100%;
-        left: 0;
         width: 100%;
         padding: 1em;
         transform: scale(0);
@@ -258,7 +255,6 @@ class ThatColorPicker extends LitElement {
         transition: transform 0.2s;
       }
 
-      .color__settings--open,
       .color:focus-within .color__settings {
         transform: scale(1);
         z-index: 2;
@@ -278,18 +274,40 @@ class ThatColorPicker extends LitElement {
         position: absolute;
         bottom: 0;
         left: 0;
-        transform: translate(-50%, -50%);
+        transform: translate(-50%, 50%);
         width: 0.75em;
         height: 0.75em;
         border-radius: 50%;
         background: white;
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
         pointer-events: none;
+        transition: width 0.2s, height 0.2s;
+      }
+
+      .color__gradient-box:active .color__gradient-box-pin {
+        width: 1em;
+        height: 1em;
+      }
+
+      .color__options-split-line {
+        position: relative;
+        margin: 1em 0;
+        width: 100%;
+        height: 0.125em;
+        background: rgba(var(--on-surface), 0.2);
+      }
+
+      .color__options-title {
+        position: absolute;
+        padding: 0 0.5em;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: rgba(var(--on-surface), 0.8);
+        background: rgb(var(--surface));
       }
 
       .color__options-container {
-        border-top: 0.0625em solid rgba(var(--on-surface), 0.1);
-        padding-top: 1em;
         position: relative;
         display: flex;
         flex-wrap: wrap;
@@ -298,6 +316,18 @@ class ThatColorPicker extends LitElement {
       .color__dot--swatch-option {
         display: inline-block;
         margin: 0.25em;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .color__dot--swatch-option:focus {
+        outline: none;
+      }
+
+      .color__dot--swatch-option:hover,
+      .color__dot--swatch-option:focus {
+        transform: scale(1.1);
+        z-index: 1;
+        box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
       }
     `
   }
@@ -320,9 +350,10 @@ class ThatColorPicker extends LitElement {
           elemRect.height
       if (v < 0) v = 0
       if (v > 1) v = 1
+
       this.l = v - (v * s) / 2
       const m = Math.min(this.l, 1 - this.l)
-      this.s = m ? (v - this.l) / m : 0
+      if (m && v - this.l) this.s = (v - this.l) / m
     }
 
     const handleMouseUp = event => {
@@ -333,10 +364,13 @@ class ThatColorPicker extends LitElement {
     }
 
     return html`
-      <div tabindex="0" class=${classMap({ color: true })}>
+      <div tabindex="0" class=${classMap({ color: true })} @focusin=${() => (this.open = true)} @focusout=${() => (this.open = false)}>
         <div class=${classMap({ color__main: true })}>
           <div class=${classMap({ color__dot: true })} style=${styleMap({ background: this.hex })}></div>
-          <div class=${classMap({ color__text: true })}>
+          <div
+            class=${classMap({ color__text: true })}
+            style=${styleMap({ color: this.open ? (this.l < 0.7 ? 'white' : `hsl(${Math.round(this.h * 360)}deg, 100%, 25%)`) : '' })}
+          >
             <div class=${classMap({ color__label: true })}>${this.label}</div>
             <div class=${classMap({ color__value: true })}>
               ${typeof this.value == 'string'
@@ -349,8 +383,8 @@ class ThatColorPicker extends LitElement {
         </div>
         <div class=${classMap({ color__settings: true })}>
           <div
-            @click=${handleMouseMove}
             @mousedown=${event => {
+              handleMouseMove(event)
               document.addEventListener('mousemove', handleMouseMove)
               document.addEventListener('mouseup', handleMouseUp)
             }}
@@ -358,7 +392,7 @@ class ThatColorPicker extends LitElement {
               document.addEventListener('touchmove', handleMouseMove)
               document.addEventListener('touchend', handleMouseUp)
             }}
-            id='gradientbox'
+            id="gradientbox"
             class=${classMap({ 'color__gradient-box': true })}
             style=${styleMap({
               background: `
@@ -369,7 +403,7 @@ class ThatColorPicker extends LitElement {
           >
             <div
               class=${classMap({ 'color__gradient-box-pin': true })}
-              style=${styleMap({ bottom: `calc(${v * 100}% - 1em)`, left: `${(2 - (2 * this.l) / v) * 100}%` })}
+              style=${styleMap({ bottom: `${v * 100}%`, left: `${(2 - (2 * this.l) / v) * 100}%` })}
             ></div>
           </div>
           <that-slider
@@ -381,56 +415,7 @@ class ThatColorPicker extends LitElement {
             max="360"
             step="0.1"
             updateContinuously
-          ></that-slider>
-          <that-slider
-            .maxValue=${Math.round(this.s * 1000) / 10}
-            @change=${event => {
-              this.s = event.target.maxValue / 100
-            }}
-            label="S"
-            max="100"
-            step="0.1"
-            updateContinuously
-          ></that-slider>
-          <that-slider
-            .maxValue=${Math.round(this.l * 1000) / 10}
-            @change=${event => {
-              this.l = event.target.maxValue / 100
-            }}
-            label="L"
-            max="100"
-            step="0.1"
-            updateContinuously
-          ></that-slider>
-          <that-slider
-            .maxValue=${Math.round(this.r * 255)}
-            @change=${event => {
-              this.r = event.target.maxValue / 255
-            }}
-            label="R"
-            max="255"
-            step="1"
-            updateContinuously
-          ></that-slider>
-          <that-slider
-            .maxValue=${Math.round(this.g * 255)}
-            @change=${event => {
-              this.g = event.target.maxValue / 255
-            }}
-            label="G"
-            max="255"
-            step="1"
-            updateContinuously
-          ></that-slider>
-          <that-slider
-            .maxValue=${Math.round(this.b * 255)}
-            @change=${event => {
-              this.b = event.target.maxValue / 255
-            }}
-            label="B"
-            max="255"
-            step="1"
-            updateContinuously
+            hideValueTextField
           ></that-slider>
           ${this.a != undefined
             ? html`
@@ -446,16 +431,49 @@ class ThatColorPicker extends LitElement {
                 ></that-slider>
               `
             : ''}
+          <that-input
+            .value=${`${(Math.round(this.h * 3600) / 10).toFixed(1)}\u00B0, ${(Math.round(this.s * 1000) / 10).toFixed(
+              1,
+            )}%, ${(Math.round(this.l * 1000) / 10).toFixed(1)}%`}
+            @change=${event => {
+              const hsl = event.target.value.split(',').map(value => {
+                return parseFloat(value)
+              })
+              this.h = hsl[0] / 360
+              this.s = hsl[1] / 100
+              this.l = hsl[2] / 100
+            }}
+            label="HSL"
+          ></that-input>
+          <that-input
+            .value=${`${Math.round(this.r * 255)}, ${Math.round(this.g * 255)}, ${Math.round(this.b * 255)}`}
+            @change=${event => {
+              const rgb = event.target.value.split(',').map(value => {
+                return parseFloat(value)
+              })
+              this.r = rgb[0] / 255
+              this.g = rgb[1] / 255
+              this.b = rgb[2] / 255
+            }}
+            label="RGB"
+          ></that-input>
           ${this.options.length > 0
             ? html`
+                <div class=${classMap({ 'color__options-split-line': true })}>
+                  <div class=${classMap({ 'color__options-title': true })}>SWATCHES</div>
+                </div>
                 <div class=${classMap({ 'color__options-container': true })}>
                   ${this.options.map(option => {
                     return html`
                       <div
+                        tabindex="0"
                         class=${classMap({ color__dot: true, 'color__dot--swatch-option': true })}
                         style=${styleMap({ background: option })}
                         title=${option}
                         @click=${() => (this.value = option)}
+                        @keypress=${event => {
+                          if (event.key == 'Enter') this.value = option
+                        }}
                       ></div>
                     `
                   })}
