@@ -4,6 +4,7 @@ import { classMap } from 'lit-html/directives/class-map'
 class ThatInput extends LitElement {
   constructor() {
     super()
+    this.type = 'string'
   }
 
   static get properties() {
@@ -13,11 +14,23 @@ class ThatInput extends LitElement {
       type: { type: String },
       min: { type: Number },
       max: { type: Number },
+      step: { type: Number },
       helpText: { type: String },
       errorText: { type: String },
       leadingIcon: { type: String },
       trailingIcon: { type: String },
+      outline: { type: Boolean },
     }
+  }
+
+  get value() {
+    return this.__value
+  }
+
+  set value(value) {
+    const oldValue = this.__value
+    this.__value = (this.type == 'number') ? Math.ceil(parseFloat(value) / this.step) * this.step : value
+    this.requestUpdate('value', oldValue)
   }
 
   static get styles() {
@@ -26,6 +39,8 @@ class ThatInput extends LitElement {
         display: inline-block;
         font-size: 1em;
         width: 17.5em;
+        height: 3.5em;
+        margin: 0.125em 0.3em;
         --primary: 98, 0, 238;
         --on-surface: 0, 0, 0;
       }
@@ -33,8 +48,7 @@ class ThatInput extends LitElement {
       .text-field {
         position: relative;
         box-sizing: border-box;
-        height: 3.5em;
-        margin: 0 0.3em;
+        height: 100%;
         border-radius: 0.25em 0.25em 0 0;
         border-bottom: 0.0625em solid rgba(var(--on-surface), 0.6);
         background: rgba(var(--on-surface), 0.039);
@@ -107,6 +121,16 @@ class ThatInput extends LitElement {
       </div>
       <div class=${classMap({ 'helper-text': true })}>${this.helpText}</div>
     `
+  }
+
+  firstUpdated(changedProperties) {
+    if (changedProperties.has('value')) this.type = typeof this.value
+    
+    if (this.type == 'number') {
+      this.min = 0
+      this.max = this.value > 1 ? Math.pow(10, this.initialValue.toString().length) : 1
+      this.step = this.value > 1 ? 1 : 0.001
+    }
   }
 }
 
