@@ -46,29 +46,37 @@ class ThatController extends LitElement {
         width: auto;
       }
 
+      that-color-picker {
+        width: 100%;
+      }
+
       .controller {
         display: block;
         position: relative;
         box-sizing: border-box;
         left: 0;
         width: 100%;
-        color: rgb(var(--on-surface));
+        color: hsl(var(--on-surface));
         border-radius: 0.5em;
         transition: box-shadow 0.2s ease-out, width 0.2s, left 0.2s;
       }
 
       .controller--has-children {
-        border: 1px solid rgba(var(--on-surface), 0.12);
-        background: rgb(var(--surface));
+        border: 1px solid hsla(var(--on-surface), 0.1);
+        background: hsl(var(--surface));
       }
 
-      .controller:not(.controller--elevate).controller--has-children:hover {
-        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+      .controller--has-children:hover {
+        z-index: 1;
       }
 
-      .controller--elevate {
+      .controller:not(.controller--open).controller--has-children:hover {
+        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+      }
+
+      .controller--open {
         border: none;
-        box-shadow: 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 3px 3px -2px rgba(0, 0, 0, 0.12), 0 1px 8px 0 rgba(0, 0, 0, 0.2);
+        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
       }
 
       .controller--active {
@@ -111,7 +119,7 @@ class ThatController extends LitElement {
         height: 0;
         border-left: 0.4em solid transparent;
         border-right: 0.4em solid transparent;
-        border-top: 0.4em solid rgba(var(--on-surface), 0.5);
+        border-top: 0.4em solid hsla(var(--on-surface), 0.5);
         transition: transform 0.2s linear, border-top-color 0.2s;
       }
 
@@ -128,11 +136,12 @@ class ThatController extends LitElement {
       .controller__form-component-container--childless-title {
         width: 100%;
         padding: 1em 0;
-        color: rgb(var(--primary));
+        color: hsl(var(--primary));
       }
 
       .controller__actions {
         display: inline-flex;
+        margin-left: 0.3125em;
         flex-wrap: nowrap;
         vertical-align: middle;
         user-select: none;
@@ -161,14 +170,10 @@ class ThatController extends LitElement {
         .controller--active {
           transition-delay: 0.2s;
         }
-        
+
         @media (max-width: 1000px) {
           :host {
-            font-size: 2rem;
-          }
-
-          that-color-picker {
-            width: 12.5em;
+            font-size: 1.5rem;
           }
         }
       }
@@ -204,7 +209,7 @@ class ThatController extends LitElement {
         id="controller"
         class=${classMap({
           controller: true,
-          'controller--elevate': !this.minimise && this.hasChildNodes(),
+          'controller--open': !this.minimise && this.hasChildNodes(),
           'controller--has-children': this.hasChildNodes(),
         })}
       >
@@ -246,6 +251,7 @@ class ThatController extends LitElement {
             })}
           >
             ${this.appendForm()}
+            <slot name="_component"></slot>
           </div>
           ${this.hideActions
             ? ''
@@ -380,11 +386,11 @@ class ThatController extends LitElement {
     }
 
     this.addEventListener('mouseover', handleOver)
-    this.addEventListener('focus', event => {
-      setActive(true)
+    this.addEventListener('focusin', event => {
+      if (!Array.prototype.some.call(this.children, element => element.hasChildNodes())) setActive(true)
     })
-    this.addEventListener('blur', event => {
-      setActive(false)
+    this.addEventListener('focusout', event => {
+      if (!Array.prototype.some.call(this.children, element => element.hasChildNodes())) setActive(false)
     })
     this.addEventListener('minimisetoggled', event => {
       setActive(!this.minimise)
@@ -485,7 +491,7 @@ class ThatController extends LitElement {
       case 'function':
         type.shift()
         return html`
-          <that-button @click=${Function(this.value)} .icon=${this.icon} .type=${type}>${this.label}</that-button>
+          <that-button @click=${this.value} .icon=${this.icon} .type=${type}>${this.label}</that-button>
         `
       case 'functionArray':
         const buttons = []
@@ -520,7 +526,7 @@ class ThatController extends LitElement {
           <that-color-picker
             .value=${this.value}
             .label=${this.label}
-            .options=${this.options ? this.options : []}
+            .swatches=${this.options ? this.options : []}
             @change=${event => {
               this.updateValue(event.srcElement.value)
             }}
@@ -548,10 +554,10 @@ class ThatController extends LitElement {
 
   updateValue(newValue) {
     this.value = newValue
-    if (this.path.split('.').length > 1) {
-      this.object[this.key] = newValue
-    } else {
+    if (typeof this.object[this.key] == 'object' && !['range', 'color'].includes(this.type)) {
       this.object[this.key].__value = newValue
+    } else {
+      this.object[this.key] = newValue
     }
   }
 }
