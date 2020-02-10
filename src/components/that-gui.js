@@ -16,11 +16,12 @@ class ThatGui extends LitElement {
     return css`
       :host {
         display: block;
-        position: relative;
+        position: absolute;
+        top: 0;
+        right: 0;
         overflow: auto;
         height: calc(100vh - 40px);
         width: 500px;
-        float: right;
         padding: 20px;
         font-family: Helvetica, Arial, sans-serif;
         box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12),
