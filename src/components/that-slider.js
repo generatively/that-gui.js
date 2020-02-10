@@ -31,6 +31,36 @@ class ThatSlider extends LitElement {
     }
   }
 
+  get minValue() {
+    return this.__minValue
+  }
+
+  set minValue(value) {
+    const oldValue = this.__minValue
+    this.__minValue =
+      value > this.max
+        ? this.max
+        : value < this.min
+        ? this.min
+        : parseFloat((this.step ? Math.round(value / this.step) * this.step : value).toPrecision(12))
+    this.requestUpdate('minValue', oldValue)
+  }
+
+  get maxValue() {
+    return this.__maxValue
+  }
+
+  set maxValue(value) {
+    const oldValue = this.__maxValue
+    this.__maxValue =
+      value > this.max
+        ? this.max
+        : value < this.min
+        ? this.min
+        : parseFloat((this.step ? Math.round(value / this.step) * this.step : value).toPrecision(12))
+    this.requestUpdate('maxValue', oldValue)
+  }
+
   static get styles() {
     return css`
       :host {
@@ -270,11 +300,6 @@ class ThatSlider extends LitElement {
   updateValue_(newValue) {
     this[this.currentThumb_ ? 'maxValue' : 'minValue'] = parseFloat(newValue.toPrecision(12))
 
-    if ((this.currentThumb_ ? this.maxValue : this.minValue) > this.max)
-      this[this.currentThumb_ ? 'maxValue' : 'minValue'] = this.max
-    if ((this.currentThumb_ ? this.maxValue : this.minValue) < this.min)
-      this[this.currentThumb_ ? 'maxValue' : 'minValue'] = this.min
-
     if (
       this[this.currentThumb_ ? 'maxValue' : 'minValue'] == this.max ||
       this[this.currentThumb_ ? 'maxValue' : 'minValue'] == this.min
@@ -428,9 +453,7 @@ class ThatSlider extends LitElement {
         newValue = that.scale_(pos / trackElem.clientWidth, 0, 1, that.min, that.max)
       }
 
-      that[this.currentThumb_ ? 'maxValue' : 'minValue'] = parseFloat(
-        (that.step == 0 ? newValue : Math.ceil(newValue / that.step) * that.step).toPrecision(12),
-      )
+      that[this.currentThumb_ ? 'maxValue' : 'minValue'] = newValue
 
       if (this.updateContinuously) this.dispatchEvent(new Event('change'))
     }
