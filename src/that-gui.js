@@ -1,8 +1,9 @@
 import './components'
 
 export class ThatGui {
-  constructor(options) {
+  constructor(options = {width: 500, parent: '', theme: {}}) {
     this.container = document.createElement('that-gui')
+    this.container.style.width = `${options.width}px`
     if (options.parent) {
       this.container.hasParent = true
       document.getElementById(options.parent).append(this.container)
@@ -49,10 +50,10 @@ export class ThatGui {
     controllerElement.gui = this
 
     if (pathKey != undefined) {
-      if (this.controllerElements[pathKey]) this.controllerElements[pathKey].appendChild(controllerElement)
+      if (this.controllerElements[pathKey]) this.controllerElements[pathKey].append(controllerElement)
       pathKey = `${pathKey}.${key}`
     } else {
-      this.container.appendChild(controllerElement)
+      this.container.append(controllerElement)
       pathKey = key
     }
 
@@ -64,7 +65,7 @@ export class ThatGui {
       ...parentObject[`_${key}`],
       object: parentObject,
       path: pathKey,
-      key: key
+      key: key,
     }
 
     if (typeof object == 'object') {
@@ -90,7 +91,7 @@ export class ThatGui {
           properties.value = object['__value']
         }
       } else if (type == 'tabswitch') {
-        const keys = Object.keys(object)
+        const keys = Object.keys(object).filter(key => key.charAt(0) != '_')
         properties.options = keys
         properties.value = keys[0]
 
@@ -105,7 +106,7 @@ export class ThatGui {
           }
         }
       } else if (type == 'color') {
-        properties.value = {...object}
+        properties.value = { ...object }
       } else {
         properties.value = [...object]
         if (!properties.type) properties.type = `${type}Array`
@@ -115,25 +116,33 @@ export class ThatGui {
     }
 
     if (!properties.type) properties.type = properties.value != undefined ? typeof properties.value : 'title'
-    
+
     for (const prop in properties) controllerElement[prop] = properties[prop]
 
     return controllerElement
   }
 
-  refreshControllers(startPointKey) {
+  remove(startPointKey) {
+    for (const key in this.controllerElements) {
+      if (key.includes(startPointKey)) {
+        this.controllerElements[key].remove()
+        delete this.controllerElements[key]
+      }
+    }
+  }
+
+  clear() {
+    Object.keys(this.objects).forEach(key => this.remove(key))
+  }
+
+  refresh(startPointKey = '') {
     if (startPointKey.length > 0) {
       const topControllerIndex = Array.prototype.indexOf.call(
         this.controllerElements[startPointKey].parentNode.children,
         this.controllerElements[startPointKey],
       )
 
-      for (const key in this.controllerElements) {
-        if (key.includes(startPointKey)) {
-          this.controllerElements[key].remove()
-          delete this.controllerElements[key]
-        }
-      }
+      this.remove(startPointKey)
 
       const path = startPointKey.split('.')
       const key = path.pop()
@@ -152,6 +161,8 @@ export class ThatGui {
 
       this.addController(key, controllersObject, pathKey)
       parentNode.insertBefore(parentNode.lastChild, parentNode.children[topControllerIndex])
+    } else {
+      Object.keys(this.objects).forEach(key => this.refresh(key))
     }
   }
 }
