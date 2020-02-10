@@ -159,9 +159,9 @@ class ThatColorPicker extends LitElement {
         width: 19.5em;
         font-size: 1em;
         cursor: pointer;
-        --primary: 98, 0, 238;
-        --surface: 255, 255, 255;
-        --on-surface: 0, 0, 0;
+        --primary: 265deg, 100%, 47%;
+        --surface: 0deg, 0%, 100%;
+        --on-surface: 0deg, 0%, 0%;
         user-select: none;
       }
 
@@ -182,13 +182,13 @@ class ThatColorPicker extends LitElement {
         padding: 1em;
         height: 3em;
         border-radius: 0.25em;
-        background: rgb(var(--surface));
+        background: hsl(var(--surface));
         overflow: hidden;
         transition: background-color 0.2s;
       }
 
       .color:hover:not(:focus-within) .color__main {
-        background: rgba(var(--on-surface), 0.06);
+        background: hsla(var(--on-surface), 0.06);
       }
 
       .color__text {
@@ -247,7 +247,7 @@ class ThatColorPicker extends LitElement {
         padding: 1em;
         transform: scale(0);
         transform-origin: top;
-        background: rgb(var(--surface));
+        background: hsl(var(--surface));
         border-radius: 0.25em;
         box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12),
           0 5px 5px -3px rgba(0, 0, 0, 0.2);

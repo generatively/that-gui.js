@@ -34,16 +34,21 @@ class ThatSlider extends LitElement {
   static get styles() {
     return css`
       :host {
-        --primary: 98, 0, 238;
-        --surface: 255, 255, 255;
-        --on-primary: 255, 255, 255;
-        --on-surface: 0, 0, 0;
+        --primary: 265deg, 100%, 47%;
+        --surface: 0deg, 0%, 100%;
+        --on-primary: 0deg, 0%, 100%;
+        --on-surface: 0deg, 0%, 0%;
+        --track: hsla(var(--primary), 0.239);
+        --bar: hsl(var(--primary));
+        --thumb: hsl(var(--primary));
+        --on-thumb: hsl(var(--on-primary));
         display: flex;
-        background: rgb(var(--surface));
-        color: rgb(var(--on-surface));
+        background: hsl(var(--surface));
+        color: hsl(var(--on-surface));
         font-size: 1em;
         border-radius: 0.25em;
         width: 17.5em;
+        touch-action: none;
       }
 
       .label {
@@ -68,15 +73,14 @@ class ThatSlider extends LitElement {
         transform: translateY(-50%);
         width: calc(100% - 1.6em);
         height: 0.125em;
-        background: rgba(var(--primary), 0.239);
-        touch-action: none;
+        background: var(--track);
         pointer-events: none;
       }
 
       .slider__bar {
         position: relative;
         height: 0.125em;
-        background: rgb(var(--primary));
+        background: var(--bar);
         transform-origin: left;
       }
 
@@ -96,8 +100,8 @@ class ThatSlider extends LitElement {
         transform: translate(-50%, -50%);
         width: 0.75em;
         height: 0.75em;
-        border-radius: 0.75em;
-        background: rgb(var(--primary));
+        border-radius: 50%;
+        background: var(--thumb);
         transition: transform 0.1s;
       }
 
@@ -112,15 +116,15 @@ class ThatSlider extends LitElement {
         transform: translate(-50%, -50%) scale(0);
         width: 2em;
         height: 2em;
-        border-radius: 1em;
-        background: rgba(var(--primary), 0.188);
+        border-radius: 50%;
+        background: var(--thumb);
         opacity: 0;
         transition: transform 0.1s, opacity 0.1s;
       }
 
       .slider__thumb:focus + .slider__focus-ring,
       .slider__thumb:active + .slider__focus-ring {
-        opacity: 1;
+        opacity: 0.188;
         transform: translate(-50%, -50%) scale(1);
       }
 
@@ -139,7 +143,7 @@ class ThatSlider extends LitElement {
       .slider__value-arrow {
         width: 0.5em;
         height: 0.5em;
-        background-color: rgb(var(--primary));
+        background-color: var(--thumb);
         transform: rotate(45deg);
       }
 
@@ -148,15 +152,14 @@ class ThatSlider extends LitElement {
         left: 50%;
         top: 0;
         min-width: 1.125em;
-        height: 1.125;
         line-height: 1.125em;
         padding: 0.3em 0.63em;
         border-radius: 0.25em;
         transform: translate(-50%, calc(-50% - 0.6em));
         font-size: 1em;
         text-align: center;
-        background-color: rgb(var(--primary));
-        color: rgb(var(--on-primary));
+        background-color: var(--thumb);
+        color: var(--on-thumb);
       }
 
       .slider__input {

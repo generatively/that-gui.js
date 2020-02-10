@@ -12,18 +12,18 @@ export class ThatGui {
     this.controllerElements = {}
     this.objects = {}
     this.theme = {
-      primary: '98, 0, 238',
-      primaryVariant: '55, 0, 179',
-      secondary: '3, 218, 198',
-      secondaryVariant: '1, 135, 134',
-      background: '255, 255, 255',
-      surface: '255, 255, 255',
-      error: '176, 0, 32',
-      onPrimary: '255, 255, 255',
-      onSecondary: '0, 0, 0',
-      onBackground: '0, 0, 0',
-      onSurface: '0, 0, 0',
-      onError: '255, 255, 255',
+      primary: '265deg, 100%, 47%',
+      primaryVariant: '258deg, 100%, 35%',
+      secondary: '174deg, 97%, 43%',
+      secondaryVariant: '180deg, 99%, 27%',
+      background: '0deg, 0%, 100%',
+      surface: '0deg, 0%, 100%',
+      error: '349deg, 100%, 35%',
+      onPrimary: '0deg, 0%, 100%',
+      onSecondary: '0deg, 0%, 0%',
+      onBackground: '0deg, 0%, 0%',
+      onSurface: '0deg, 0%, 0%',
+      onError: '0deg, 0%, 100%',
       ...options.theme,
     }
   }

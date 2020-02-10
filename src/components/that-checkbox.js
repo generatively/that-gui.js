@@ -1,6 +1,5 @@
 import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
-import { styleMap } from 'lit-html/directives/style-map'
 
 class ThatCheckbox extends LitElement {
   constructor() {
@@ -22,10 +21,10 @@ class ThatCheckbox extends LitElement {
         vertical-align: middle;
         align-items: center;
         cursor: pointer;
-        --primary: 98, 0, 238;
-        --surface: 255, 255, 255;
-        --on-primary: 255, 255, 255;
-        --on-surface: 0, 0, 0;
+        --primary: 265deg, 100%, 47%;
+        --surface: 0deg, 0%, 100%;
+        --on-primary: 0deg, 0%, 100%;
+        --on-surface: 0deg, 0%, 0%;
       }
 
       .checkbox {
@@ -54,7 +53,7 @@ class ThatCheckbox extends LitElement {
         width: 2.8125em;
         height: 2.8125em;
         border-radius: 1.4375em;
-        background: rgba(var(--primary), 0.188);
+        background: hsla(var(--primary), 0.188);
         opacity: 0;
       }
 
@@ -93,7 +92,7 @@ class ThatCheckbox extends LitElement {
 
       .checkbox:not(.checkbox--checked):focus .checkbox__focus-ring,
       .checkbox:not(.checkbox--checked):active .checkbox__active-ring {
-        background: rgba(var(--on-surface), 0.188);
+        background: hsla(var(--on-surface), 0.188);
       }
 
       .checkbox__box {
@@ -104,14 +103,14 @@ class ThatCheckbox extends LitElement {
         width: 1.25em;
         height: 1.25em;
         box-sizing: border-box;
-        border: 0.125em solid rgba(var(--on-surface), 0.54);
+        border: 0.125em solid hsla(var(--on-surface), 0.54);
         border-radius: 0.125em;
-        background: rgba(var(--surface), 0.54);
+        background: hsla(var(--surface), 0.54);
       }
 
       .checkbox--checked .checkbox__box {
         border: none;
-        background: rgb(var(--primary));
+        background: hsl(var(--primary));
       }
 
       .checkbox__checkmark {
@@ -130,7 +129,7 @@ class ThatCheckbox extends LitElement {
 
       .checkbox__checkmark-path {
         stroke-width: 3.5;
-        stroke: rgb(var(--on-primary));
+        stroke: hsl(var(--on-primary));
       }
 
       .checkbox--ripple.checkbox--checked .checkbox__checkmark-path {

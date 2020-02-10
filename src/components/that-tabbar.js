@@ -24,15 +24,14 @@ class ThatTabBar extends LitElement {
         width: 100%;
         font-size: 1em;
         cursor: pointer;
-        --primary: 98, 0, 238;
-        --surface: 255, 255, 255;
-        --on-surface: 0, 0, 0;
+        --primary: 265deg, 100%, 47%;
+        --surface: 0deg, 0%, 100%;
+        --on-surface: 0deg, 0%, 0%;
       }
 
       .tabbar {
         display: inline-flex;
         width: 100%;
-        padding: 0 0.3em;
         box-sizing: border-box;
       }
 
@@ -47,11 +46,11 @@ class ThatTabBar extends LitElement {
       }
 
       .tabbar__option:hover:not(.tabbar__option--selected) {
-        background: rgba(var(--on-surface), 0.06);
+        background: hsla(var(--on-surface), 0.06);
       }
 
       .tabbar__option:active:not(.tabbar__option--selected) {
-        background: rgba(var(--primary), 0.2);
+        background: hsla(var(--primary), 0.2);
       }
 
       .tabbar__option:focus {
@@ -59,11 +58,11 @@ class ThatTabBar extends LitElement {
       }
 
       .tabbar__option--selected {
-        background: rgba(var(--primary), 0.1);
+        background: hsla(var(--primary), 0.1);
       }
 
       .tabbar__option--active {
-        border-bottom: 0.125em solid rgba(var(--primary), 0.6);
+        border-bottom: 0.125em solid hsla(var(--primary), 0.6);
       }
     `
   }
