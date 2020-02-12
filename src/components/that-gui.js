@@ -15,21 +15,25 @@ class ThatGui extends LitElement {
   static get styles() {
     return css`
       :host {
-        display: block;
         position: absolute;
         top: 0;
         right: 0;
+        display: block;
         overflow: auto;
+        width: calc(100% - 40px);
         height: calc(100vh - 40px);
-        width: 500px;
-        padding: 20px;
         font-family: Helvetica, Arial, sans-serif;
-        box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12),
-          0 5px 5px -3px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+        padding: 20px;
       }
 
       :host[hasParent] {
-        width: calc(100% - 40px);
+        position: unset;
+        top: unset;
+        right: unset;
+        width: 100%;
+        height: 100%;
+        box-shadow: none;
       }
 
       :host::-webkit-scrollbar {
