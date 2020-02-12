@@ -1,17 +1,17 @@
 import './components'
+import { componentFactory } from './component-factory'
 
 export class ThatGui {
-  constructor(options = {width: 500, parent: '', theme: {}}) {
+  constructor(options = {width: 500, parent: '', theme: {}, componentFactory: {} }) {
     this.container = document.createElement('that-gui')
-    this.container.style.width = `${options.width}px`
     if (options.parent) {
       this.container.hasParent = true
       document.getElementById(options.parent).append(this.container)
     } else {
       document.body.append(this.container)
+      this.container.style.width = `${options.width}px`
     }
-    this.controllerElements = {}
-    this.objects = {}
+    this.componentFactory = {...componentFactory, ...options.componentFactory}
     this.theme = {
       primary: '265deg, 100%, 47%',
       primaryVariant: '258deg, 100%, 35%',
@@ -27,6 +27,8 @@ export class ThatGui {
       onError: '0deg, 0%, 100%',
       ...options.theme,
     }
+    this.controllerElements = {}
+    this.objects = {}
   }
 
   updateAllControllers() {
@@ -99,10 +101,7 @@ export class ThatGui {
           const childObject = object[childKey]
           for (const grandChildKey in childObject) {
             const elem = this.addController(grandChildKey, childObject, `${pathKey}.${childKey}`)
-            if (elem) {
-              controllerElement.append(elem)
-              elem.slot = childKey
-            }
+            if (elem) controllerElement.appendChild(elem).slot = childKey
           }
         }
       } else if (type == 'color') {
@@ -118,6 +117,8 @@ export class ThatGui {
     if (!properties.type) properties.type = properties.value != undefined ? typeof properties.value : 'title'
 
     for (const prop in properties) controllerElement[prop] = properties[prop]
+
+    this.componentFactory[properties.type.split(" ")[0]](properties)
 
     return controllerElement
   }
