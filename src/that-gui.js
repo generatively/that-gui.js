@@ -2,7 +2,7 @@ import './components'
 import { componentFactory } from './component-factory'
 
 export class ThatGui {
-  constructor(options = {width: 500, parent: '', theme: {}, componentFactory: {} }) {
+  constructor(options = { width: 500, parent: '', theme: {}, componentFactory: {} }) {
     this.container = document.createElement('that-gui')
     if (options.parent) {
       this.container.hasParent = true
@@ -11,7 +11,7 @@ export class ThatGui {
       document.body.append(this.container)
       this.container.style.width = `${options.width}px`
     }
-    this.componentFactory = {...componentFactory, ...options.componentFactory}
+    this.componentFactory = { ...componentFactory, ...options.componentFactory }
     this.theme = {
       primary: '265deg, 100%, 47%',
       primaryVariant: '258deg, 100%, 35%',
@@ -92,7 +92,7 @@ export class ThatGui {
         if (object['__value'] != undefined) {
           properties.value = object['__value']
         }
-      } else if (type == 'tabswitch') {
+      } else if (properties.switch) {
         const keys = Object.keys(object).filter(key => key.charAt(0) != '_')
         properties.options = keys
         properties.value = keys[0]
@@ -108,7 +108,7 @@ export class ThatGui {
         properties.value = { ...object }
       } else {
         properties.value = [...object]
-        if (!properties.type) properties.type = `${type}Array`
+        if (!properties.type) properties.type = type
       }
     } else {
       properties.value = object
@@ -118,14 +118,20 @@ export class ThatGui {
 
     for (const prop in properties) controllerElement[prop] = properties[prop]
 
-    this.componentFactory[properties.type.split(" ")[0]](properties)
+    controllerElement.component = this.componentFactory[properties.type.split(' ')[0]](properties, controllerElement)
 
     return controllerElement
   }
 
-  remove(startPointKey) {
+  remove(startPointPath) {
+    const pathArray = startPointPath.split('.')
     for (const key in this.controllerElements) {
-      if (key.includes(startPointKey)) {
+      const keyArray = key.split('.')
+      if (pathArray.every(i => keyArray.includes(i))) {
+        Array.isArray(this.controllerElements[key].component)
+          ? this.controllerElements[key].component.forEach(elem => elem.remove())
+          : this.controllerElements[key].component.remove()
+        delete this.controllerElements[key].component
         this.controllerElements[key].remove()
         delete this.controllerElements[key]
       }

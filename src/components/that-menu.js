@@ -4,7 +4,6 @@ import { classMap } from 'lit-html/directives/class-map'
 class ThatMenu extends LitElement {
   constructor() {
     super()
-    this.value = ''
     this.options = []
     this.open = false
   }
@@ -197,7 +196,7 @@ class ThatMenu extends LitElement {
         }}
       >
         <div class=${classMap({ menu__value: true })}>${this.value}</div>
-        <label class=${classMap({ menu__label: true, 'menu__label--float': this.value != '' })}>
+        <label class=${classMap({ menu__label: true, 'menu__label--float': this.value })}>
           ${this.label}
         </label>
         <div class=${classMap({ menu__arrow: true, 'menu__arrow--open': this.open })}></div>
@@ -221,7 +220,9 @@ class ThatMenu extends LitElement {
   }
 
   firstUpdated(changedProperties) {
-    if (changedProperties.has('value')) this.currentIndex_ = this.options.indexOf(this.value)
+    if (changedProperties.has('value')) {
+      this.currentIndex_ = this.options.indexOf(this.value)
+    }
   }
 
   updated(changedProperties) {

@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit-element'
+import { classMap } from 'lit-html/directives/class-map'
 
-class ThatGui extends LitElement {
+class ThatGuiComponent extends LitElement {
   constructor() {
     super()
     this.hasParent = false
@@ -8,26 +9,30 @@ class ThatGui extends LitElement {
 
   static get properties() {
     return {
-      hasParent: { type: Boolean, reflect: true },
+      hasParent: { type: Boolean },
     }
   }
 
   static get styles() {
     return css`
       :host {
+        font-family: Helvetica, Arial, sans-serif;
+      }
+
+      .container {
         position: absolute;
+        overflow-y: scroll;
         top: 0;
         right: 0;
         display: block;
-        overflow: auto;
-        width: calc(100% - 40px);
+        box-sizing: border-box;
+        width: 100%;
         height: calc(100vh - 40px);
-        font-family: Helvetica, Arial, sans-serif;
         box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
         padding: 20px;
       }
 
-      :host[hasParent] {
+      .container--has-parent {
         position: unset;
         top: unset;
         right: unset;
@@ -36,16 +41,16 @@ class ThatGui extends LitElement {
         box-shadow: none;
       }
 
-      :host::-webkit-scrollbar {
+      .container::-webkit-scrollbar {
         width: 10px;
         height: 10px;
       }
 
-      :host::-webkit-scrollbar-track {
+      .container::-webkit-scrollbar-track {
         background: #efefef;
       }
 
-      :host::-webkit-scrollbar-thumb {
+      .container::-webkit-scrollbar-thumb {
         background: #aaa;
       }
     `
@@ -53,11 +58,11 @@ class ThatGui extends LitElement {
 
   render() {
     return html`
-      <div>
+      <div class=${classMap({ container: true, 'container--has-parent': this.hasParent })}>
         <slot></slot>
       </div>
     `
   }
 }
 
-customElements.define('that-gui', ThatGui)
+customElements.define('that-gui', ThatGuiComponent)

@@ -11,7 +11,7 @@ class ThatColorPicker extends LitElement {
     this.swatches = []
     this.noAlpha = false
     this.open = false
-    this._currentTab = 'picker'
+    this._currentTab = 'PICKER'
   }
 
   static get properties() {
@@ -141,14 +141,14 @@ class ThatColorPicker extends LitElement {
 
       case 'rgb':
         this._setHSLFromRGB([value.r / 255, value.g / 255, value.b / 255])
-        if (value.a) this.a = value.a
+        this.a = value.a != undefined ? value.a : 1
         break
 
       case 'hsl':
         this.h = value.h / 360
         this.s = value.s / 100
         this.l = value.l / 100
-        if (value.a) this.a = value.a
+        this.a = value.a != undefined ? value.a : 1
         break
     }
   }
@@ -167,11 +167,11 @@ class ThatColorPicker extends LitElement {
       }
 
       that-slider {
-        width: 100%;
+        width: initial;
       }
 
       that-input {
-        width: calc(100% - 0.6em);
+        width: calc(50% - 0.125em);
       }
 
       .color:focus {
@@ -238,12 +238,11 @@ class ThatColorPicker extends LitElement {
         transition: transform 0.2s ease-out;
       }
 
-      .color__settings {
+      .color__settings-container {
         position: absolute;
         box-sizing: border-box;
         top: 100%;
         width: 100%;
-        padding: 1em;
         transform: scale(0);
         transform-origin: top;
         background: hsl(var(--surface));
@@ -251,16 +250,17 @@ class ThatColorPicker extends LitElement {
         box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12),
           0 5px 5px -3px rgba(0, 0, 0, 0.2);
         z-index: 1;
+        overflow: hidden;
         transition: transform 0.2s;
       }
 
-      .color:focus-within .color__settings {
+      .color:focus-within .color__settings-container {
         transform: scale(1);
         z-index: 2;
       }
 
-      .color__tabbar {
-        margin-bottom: 0.75em;
+      .color__settings {
+        padding: 1em;
       }
 
       .color__gradient-box {
@@ -299,21 +299,38 @@ class ThatColorPicker extends LitElement {
         justify-content: center;
       }
 
-      .color__dot--swatch-swatch {
+      .color__dot--swatch {
+        position: relative;
         display: inline-block;
         margin: 0.25em;
         transition: transform 0.2s, box-shadow 0.2s;
       }
 
-      .color__dot--swatch-swatch:focus {
+      .color__dot--swatch:focus {
         outline: none;
       }
 
-      .color__dot--swatch-swatch:hover,
-      .color__dot--swatch-swatch:focus {
+      .color__dot--swatch:hover,
+      .color__dot--swatch:focus {
         transform: scale(1.1);
         z-index: 1;
         box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+      }
+
+      .color__delete-swatch {
+        display: none;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 1em;
+        line-height: 1em;
+        border-radius: 0.5em;
+        color: white;
+        background: red;
+      }
+
+      .color__dot--swatch:hover .color__delete-swatch {
+        display: initial;
       }
 
       .color__dot--add-button {
@@ -385,7 +402,7 @@ class ThatColorPicker extends LitElement {
             class=${classMap({ color__text: true })}
             style=${styleMap({
               color: this.open
-                ? ((1 - this.a) + this.r + this.g + this.b) / 4 < 0.4
+                ? this.a > 0.5 && this.l < 0.7
                   ? 'white'
                   : `hsl(${Math.round(this.h * 360)}deg, 100%, 25%)`
                 : '',
@@ -401,191 +418,246 @@ class ThatColorPicker extends LitElement {
             </div>
           </div>
         </div>
-        <div class=${classMap({ color__settings: true })}>
+        <div class=${classMap({ 'color__settings-container': true })}>
           <that-tabbar
             value=${this._currentTab}
             @change=${event => (this._currentTab = event.target.value)}
-            .options=${['picker', 'options', 'swatches']}
+            .options=${['PICKER', 'OPTIONS', 'SWATCHES']}
             class=${classMap({ color__tabbar: true })}
+            style=${styleMap({ '--primary': `${Math.round(this.h * 360)}deg, ${Math.round(this.s * 100)}%, 50%` })}
           ></that-tabbar>
-          ${this._currentTab == 'swatches'
-            ? html`
-                <div class=${classMap({ 'color__swatches-container': true })}>
-                  ${this.swatches.map(swatch => {
-                    return html`
-                      <div
-                        tabindex="0"
-                        class=${classMap({ color__dot: true, 'color__dot--swatch-swatch': true })}
-                        style=${styleMap({ background: swatch })}
-                        title=${swatch}
-                        @click=${() => (this.value = swatch)}
-                        @keypress=${event => {
-                          if (event.key == 'Enter') this.value = swatch
-                        }}
-                      ></div>
-                    `
-                  })}
-                  ${!this.swatches.includes(this.hex)
-                    ? html`
+          <div class=${classMap({ color__settings: true })}>
+            ${this._currentTab == 'SWATCHES'
+              ? html`
+                  <div class=${classMap({ 'color__swatches-container': true })}>
+                    ${this.swatches.map((swatch, index) => {
+                      return html`
                         <div
                           tabindex="0"
-                          class=${classMap({
-                            color__dot: true,
-                            'color__dot--swatch-swatch': true,
-                            'color__dot--add-button': true,
-                          })}
-                          style=${styleMap({
-                            background: this.hex,
-                            color:
-                              this.l < 0.7 && this.a > 0.5 ? 'white' : `hsl(${Math.round(this.h * 360)}deg, 100%, 25%)`,
-                          })}
-                          title=${this.hex}
-                          @click=${() => {
-                            this.swatches = [...this.swatches, this.hex]
-                            this.shadowRoot.getElementById('container').focus()
+                          class=${classMap({ color__dot: true, 'color__dot--swatch': true })}
+                          style=${styleMap({ background: swatch })}
+                          title=${swatch}
+                          @click=${event => {
+                            if (event.target.classList.contains('color__delete-swatch')) return
+                            this.hex = swatch
                           }}
-                          @keypress=${event => {
-                            if (event.key == 'Enter') {
-                              this.swatches = [...this.swatches, this.hex]
-                              this.shadowRoot.getElementById('container').focus()
+                          @keyup=${event => {
+                            switch (event.key) {
+                              case 'Enter':
+                                this.hex = swatch
+                                return
+
+                              case 'Delete':
+                                this.swatches = this.swatches.filter((v, i) => i != index)
+                                this.shadowRoot.getElementById('container').focus()
+                                return
+
+                              default:
+                                return
                             }
                           }}
-                        ></div>
+                        >
+                          <div
+                            class=${classMap({ 'color__delete-swatch': true })}
+                            @click=${() => {
+                              this.swatches = this.swatches.filter((v, i) => i != index)
+                              this.shadowRoot.getElementById('container').focus()
+                            }}
+                          >
+                            &times
+                          </div>
+                        </div>
                       `
-                    : ''}
-                </div>
-              `
-            : this._currentTab == 'options'
-            ? html`
-                <that-input
-                  .value=${`${(Math.round(this.h * 3600) / 10).toFixed(1)}\u00B0, ${(
-                    Math.round(this.s * 1000) / 10
-                  ).toFixed(1)}%, ${(Math.round(this.l * 1000) / 10).toFixed(1)}%`}
-                  @change=${event => {
-                    const hsl = event.target.value.split(',').map(value => {
-                      return parseFloat(value)
-                    })
-                    this.h = hsl[0] / 360
-                    this.s = hsl[1] / 100
-                    this.l = hsl[2] / 100
-                  }}
-                  label="HSL"
-                ></that-input>
-                <that-input
-                  .value=${`${Math.round(this.r * 255)}, ${Math.round(this.g * 255)}, ${Math.round(this.b * 255)}`}
-                  @change=${event => {
-                    const rgb = event.target.value.split(',').map(value => {
-                      return parseFloat(value)
-                    })
-                    this.r = rgb[0] / 255
-                    this.g = rgb[1] / 255
-                    this.b = rgb[2] / 255
-                  }}
-                  label="RGB"
-                ></that-input>
-                <that-input
-                  .value=${this.hex.toUpperCase()}
-                  @click=${event => (this.hex = event.target.value)}
-                  @change=${event => {
-                    let value = event.target.value
-                    if (value.charAt(0) != '#') value = '#' + value
-                    if (value.length < 7) return
-                    this.hex = value
-                  }}
-                  label="HEX"
-                ></that-input>
-                ${this.a != undefined
-                  ? html`
-                      <that-input
-                        .value=${Math.round(this.a * 1000) / 1000}
-                        label="ALPHA"
-                        @change=${event => {
-                          this.a = event.target.value
-                        }}
-                      ></that-input>
-                    `
-                  : ''}
-              `
-            : html`
-                <div
-                  @mousedown=${event => {
-                    handleMouseMove(event)
-                    document.addEventListener('mousemove', handleMouseMove)
-                    document.addEventListener('mouseup', handleMouseUp)
-                  }}
-                  @touchstart=${event => {
-                    handleMouseMove(event)
-                    document.addEventListener('touchmove', handleMouseMove)
-                    document.addEventListener('touchend', handleMouseUp)
-                  }}
-                  id="gradientbox"
-                  class=${classMap({ 'color__gradient-box': true })}
-                  style=${styleMap({
-                    background: `
+                    })}
+                    ${!this.swatches.includes(this.hex)
+                      ? html`
+                          <div
+                            tabindex="0"
+                            class=${classMap({
+                              color__dot: true,
+                              'color__dot--swatch': true,
+                              'color__dot--add-button': true,
+                            })}
+                            style=${styleMap({
+                              background: this.hex,
+                              color:
+                                this.l < 0.7 && this.a > 0.5
+                                  ? 'white'
+                                  : `hsl(${Math.round(this.h * 360)}deg, ${Math.round(this.s * 100)}%, 25%)`,
+                            })}
+                            title=${this.hex}
+                            @click=${() => {
+                              this.swatches = [...this.swatches, this.hex]
+                              this.shadowRoot.getElementById('container').focus()
+                            }}
+                            @keypress=${event => {
+                              if (event.key == 'Enter') {
+                                this.swatches = [...this.swatches, this.hex]
+                                this.shadowRoot.getElementById('container').focus()
+                              }
+                            }}
+                          ></div>
+                        `
+                      : undefined}
+                  </div>
+                `
+              : this._currentTab == 'OPTIONS'
+              ? html`
+                  <that-input
+                    .value=${`${(Math.round(this.h * 3600) / 10).toFixed(1)}\u00B0, ${(
+                      Math.round(this.s * 1000) / 10
+                    ).toFixed(1)}%, ${(Math.round(this.l * 1000) / 10).toFixed(1)}%`}
+                    @change=${event => {
+                      const hsl = event.target.value.split(',').map(value => {
+                        return parseFloat(value)
+                      })
+                      this.h = hsl[0] / 360
+                      this.s = hsl[1] / 100
+                      this.l = hsl[2] / 100
+                    }}
+                    label="HSL"
+                    style=${styleMap({
+                      '--primary': `${Math.round(this.h * 360)}deg, ${Math.round(this.s * 100)}%, ${
+                        this.l < 0.5 ? Math.round(this.l * 100) : 50
+                      }%`,
+                    })}
+                  ></that-input>
+                  <that-input
+                    .value=${`${Math.round(this.r * 255)}, ${Math.round(this.g * 255)}, ${Math.round(this.b * 255)}`}
+                    @change=${event => {
+                      const rgb = event.target.value.split(',').map(value => {
+                        return parseFloat(value)
+                      })
+                      this.r = rgb[0] / 255
+                      this.g = rgb[1] / 255
+                      this.b = rgb[2] / 255
+                    }}
+                    label="RGB"
+                    style=${styleMap({
+                      '--primary': `${Math.round(this.h * 360)}deg, ${Math.round(this.s * 100)}%, ${
+                        this.l < 0.5 ? Math.round(this.l * 100) : 50
+                      }%`,
+                    })}
+                  ></that-input>
+                  <that-input
+                    .value=${this.hex.toUpperCase()}
+                    @click=${event => (this.hex = event.target.value)}
+                    @change=${event => {
+                      let value = event.target.value
+                      if (value.charAt(0) != '#') value = '#' + value
+                      if (value.length < 7) return
+                      this.hex = value
+                    }}
+                    label="HEX"
+                    style=${styleMap({
+                      '--primary': `${Math.round(this.h * 360)}deg, ${Math.round(this.s * 100)}%, ${
+                        this.l < 0.5 ? Math.round(this.l * 100) : 50
+                      }%`,
+                    })}
+                  ></that-input>
+                  ${this.a != undefined
+                    ? html`
+                        <that-input
+                          .value=${Math.round(this.a * 1000) / 1000}
+                          label="ALPHA"
+                          @change=${event => {
+                            this.a = event.target.value
+                          }}
+                          style=${styleMap({
+                            '--primary': `${Math.round(this.h * 360)}deg, ${Math.round(this.s * 100)}%, ${
+                              this.l < 0.5 ? Math.round(this.l * 100) : 50
+                            }%`,
+                          })}
+                        ></that-input>
+                      `
+                    : undefined}
+                `
+              : html`
+                  <div
+                    @mousedown=${event => {
+                      handleMouseMove(event)
+                      document.addEventListener('mousemove', handleMouseMove)
+                      document.addEventListener('mouseup', handleMouseUp)
+                    }}
+                    @touchstart=${event => {
+                      handleMouseMove(event)
+                      document.addEventListener('touchmove', handleMouseMove)
+                      document.addEventListener('touchend', handleMouseUp)
+                    }}
+                    id="gradientbox"
+                    class=${classMap({ 'color__gradient-box': true })}
+                    style=${styleMap({
+                      background: `
                 linear-gradient(rgba(0, 0, 0, 0), black), 
                 linear-gradient(to left, hsl(${Math.round(this.h * 360)}deg, 100%, 50%), white)
               `,
-                  })}
-                >
-                  <div
-                    class=${classMap({ 'color__gradient-box-pin': true })}
-                    style=${styleMap({ bottom: `${v * 100}%`, left: `${(2 - (2 * this.l) / v) * 100}%` })}
-                  ></div>
-                </div>
-                <that-slider
-                  style=${styleMap({
-                    '--track': `linear-gradient(to right, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000)`,
-                    '--bar': 'none',
-                    '--thumb': `hsl(${Math.round(this.h * 360)}deg, 100%, 45%)`,
-                  })}
-                  .maxValue=${Math.round(this.h * 3600) / 10}
-                  @change=${event => {
-                    this.h = event.target.maxValue / 360
-                  }}
-                  max="360"
-                  step="0.1"
-                  updateContinuously
-                  hideValueTextField
-                ></that-slider>
-                ${this.a != undefined
-                  ? html`
-                      <that-slider
-                        style=${styleMap({
-                          '--track': `linear-gradient(to right, ${this.hex.slice(0, 7)}00, ${
-                            this.l < 0.7
-                              ? this.hex.slice(0, 7)
-                              : `hsl(${Math.round(this.h * 360)}deg, ${Math.round(this.s * 100)}%, 70%)`
-                          })`,
-                          '--bar': 'none',
-                          '--thumb':
-                            this.l < 0.7
-                              ? this.hex.slice(0, 7)
-                              : `hsl(${Math.round(this.h * 360)}deg, ${Math.round(this.s * 100)}%, 70%)`,
-                          '--on-thumb': this.l < 0.7 ? 'white' : `hsl(${Math.round(this.h * 360)}deg, 100%, 25%)`,
-                        })}
-                        .maxValue=${Math.round(this.a * 1000) / 1000}
-                        @change=${event => {
-                          this.a = event.target.maxValue
-                        }}
-                        max="1"
-                        step="0.001"
-                        updateContinuously
-                        hideValueTextField
-                      ></that-slider>
-                    `
-                  : ''}
-              `}
+                    })}
+                  >
+                    <div
+                      class=${classMap({ 'color__gradient-box-pin': true })}
+                      style=${styleMap({ bottom: `${v * 100}%`, left: `${(2 - (2 * this.l) / v) * 100}%` })}
+                    ></div>
+                  </div>
+                  <that-slider
+                    style=${styleMap({
+                      '--track': `linear-gradient(to right, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000)`,
+                      '--bar': 'none',
+                      '--thumb': `hsl(${Math.round(this.h * 360)}deg, 100%, 45%)`,
+                    })}
+                    .maxValue=${Math.round(this.h * 3600) / 10}
+                    @change=${event => {
+                      this.h = event.target.maxValue / 360
+                    }}
+                    max="360"
+                    step="0.1"
+                    updateContinuously
+                    hideValueTextField
+                  ></that-slider>
+                  ${this.a != undefined
+                    ? html`
+                        <that-slider
+                          style=${styleMap({
+                            '--track': `linear-gradient(to right, ${this.hex.slice(0, 7)}00, ${
+                              this.l < 0.7
+                                ? this.hex.slice(0, 7)
+                                : `hsl(${Math.round(this.h * 360)}deg, ${Math.round(this.s * 100)}%, 70%)`
+                            })`,
+                            '--bar': 'none',
+                            '--thumb':
+                              this.l < 0.7
+                                ? this.hex.slice(0, 7)
+                                : `hsl(${Math.round(this.h * 360)}deg, ${Math.round(this.s * 100)}%, 70%)`,
+                            '--on-thumb':
+                              this.l < 0.7
+                                ? 'white'
+                                : `hsl(${Math.round(this.h * 360)}deg, ${Math.round(this.s * 100)}%, 25%)`,
+                          })}
+                          .maxValue=${Math.round(this.a * 1000) / 1000}
+                          @change=${event => {
+                            this.a = event.target.maxValue
+                          }}
+                          max="1"
+                          step="0.001"
+                          updateContinuously
+                          hideValueTextField
+                        ></that-slider>
+                      `
+                    : undefined}
+                `}
+          </div>
         </div>
       </div>
     `
   }
 
+  firstUpdated(changedProperties) {
+    if (['h', 's', 'l'].some(i => changedProperties.has(i))) {
+      if (!this.swatches.includes(this.hex)) this.swatches.unshift(this.hex)
+    }
+  }
+
   updated(changedProperties) {
-    if (
-      ['h', 's', 'l', 'a'].some(i => {
-        return changedProperties.has(i)
-      })
-    ) {
+    if (['h', 's', 'l', 'a'].some(i => changedProperties.has(i))) {
       this.dispatchEvent(new Event('change'))
     }
   }

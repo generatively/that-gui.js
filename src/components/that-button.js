@@ -142,7 +142,7 @@ class ThatButton extends LitElement {
                     `}
               </div>
             `
-          : ''}
+          : undefined}
         <span class=${classMap({ text: true })}><slot></slot></span>
       </div>
     `

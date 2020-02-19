@@ -40,7 +40,6 @@ class ThatInput extends LitElement {
         font-size: 1em;
         width: 17.5em;
         height: 3.5em;
-        margin: 0.125em 0;
         --primary: 265deg, 100%, 47%;
         --on-surface: 0deg, 0%, 0%;
       }
@@ -111,7 +110,6 @@ class ThatInput extends LitElement {
           .value=${this.value}
           @change=${event => {
             this.value = event.target.value
-            this.dispatchEvent(new Event('change'))
           }}
           class=${classMap({ 'text-field__input': true })}
         />
@@ -124,13 +122,19 @@ class ThatInput extends LitElement {
   }
 
   firstUpdated(changedProperties) {
-    if (changedProperties.has('value')) this.type = typeof this.value
+    if (changedProperties.has('value')) {
+      this.type = typeof this.value
+    }
     
     if (this.type == 'number') {
       this.min = 0
-      this.max = this.value > 1 ? Math.pow(10, this.initialValue.toString().length) : 1
+      this.max = this.value > 1 ? Math.pow(10, this.value.toString().length) : 1
       this.step = this.value > 1 ? 1 : 0.001
     }
+  }
+
+  updated(changedProperties) {
+    if (changedProperties.has('value')) this.dispatchEvent(new Event('change'))
   }
 }
 

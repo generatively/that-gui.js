@@ -4,7 +4,6 @@ import { classMap } from 'lit-html/directives/class-map'
 class ThatCheckbox extends LitElement {
   constructor() {
     super()
-    this.value = ''
   }
 
   static get properties() {
@@ -32,7 +31,7 @@ class ThatCheckbox extends LitElement {
         position: relative;
         width: 1.25em;
         height: 1.25em;
-        margin: 0.875em;
+        padding: 0.875em;
       }
 
       .checkbox:focus {
@@ -147,13 +146,17 @@ class ThatCheckbox extends LitElement {
   }
 
   render() {
+    const handleChange = (event) => {
+      this.value = !this.value
+      event.target.classList.remove('checkbox--ripple')
+      void event.target.offsetWidth
+      event.target.classList.add('checkbox--ripple')
+    }
     return html`
       <div
         tabindex="0"
         class=${classMap({ checkbox: true, 'checkbox--checked': this.value })}
-        @click=${event => {
-          this.handleChange(event)
-        }}
+        @click=${handleChange}
         @keydown=${event => {
           if (![' ', 'Enter'].includes(event.key)) return
           event.preventDefault()
@@ -164,7 +167,7 @@ class ThatCheckbox extends LitElement {
           switch (event.key) {
             case 'Enter':
             case ' ':
-              this.handleChange(event)
+              handleChange(event)
               return
           }
         }}
@@ -187,13 +190,6 @@ class ThatCheckbox extends LitElement {
 
   updated(changedProperties) {
     if (changedProperties.has('value')) this.dispatchEvent(new Event('change'))
-  }
-
-  handleChange(event) {
-    this.value = !this.value
-    event.target.classList.remove('checkbox--ripple')
-    void event.target.offsetWidth
-    event.target.classList.add('checkbox--ripple')
   }
 }
 

@@ -1,12 +1,11 @@
 import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
-import { styleMap } from 'lit-html/directives/style-map'
 
 class ThatController extends LitElement {
   constructor() {
     super()
     this.tags = []
-    this.actions = []
+    this.actions = {}
     this.minimise = false
   }
 
@@ -14,21 +13,14 @@ class ThatController extends LitElement {
     return {
       path: { type: String },
       key: { type: String },
-      label: { type: String },
       object: { type: Object },
       gui: { type: Object },
       type: { type: String },
       tags: { type: Array },
-      actions: { type: Array },
+      actions: { type: Object },
       hideActions: { type: Boolean },
       minimise: { type: Boolean },
-      value: {},
-      initialValue: {},
-      min: { type: Number },
-      max: { type: Number },
-      step: { type: Number },
-      icon: { type: String },
-      options: { type: Array },
+      component: { type: Object },
     }
   }
 
@@ -58,7 +50,7 @@ class ThatController extends LitElement {
         width: 100%;
         color: hsl(var(--on-surface));
         border-radius: 0.5em;
-        transition: box-shadow 0.2s ease-out, width 0.2s, left 0.2s;
+        transition: box-shadow 0.2s ease-out, width 0.1s, left 0.1s;
       }
 
       .controller--has-children {
@@ -85,17 +77,12 @@ class ThatController extends LitElement {
         z-index: 1;
       }
 
-      .controller--has-children .controller__form-container {
-        padding: 1em;
-      }
-
       .controller__form-container {
         display: flex;
         align-items: center;
       }
 
       .controller--has-children .controller__form-container--is-title {
-        display: block;
         cursor: pointer;
         user-select: none;
       }
@@ -104,10 +91,32 @@ class ThatController extends LitElement {
         cursor: pointer;
         display: inline-block;
         position: relative;
-        margin-right: 0.6em;
-        width: 1em;
-        height: 1em;
+        width: 3em;
+        height: 3em;
         vertical-align: middle;
+      }
+
+      .controller__minimise-arrow-container::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        width: 2.5em;
+        height: 2.5em;
+        border-radius: 50%;
+        opacity: 0;
+        background: hsla(var(--on-surface), 0.1);
+        transition: opacity 0.2s, transform 0.2s;
+      }
+
+      .controller__minimise-arrow-container:focus {
+        outline: none;
+      }
+
+      .controller__minimise-arrow-container:focus::after {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
       }
 
       .controller__minimise-arrow {
@@ -133,27 +142,81 @@ class ThatController extends LitElement {
         text-align: center;
       }
 
+      .controller--has-children .controller__form-component-container {
+        text-align: left;
+        padding: 1em 0;
+      }
+
       .controller__form-component-container--childless-title {
         width: 100%;
-        padding: 1em 0;
         color: hsl(var(--primary));
+        padding: 1em 0;
       }
 
-      .controller__actions {
-        display: inline-flex;
-        margin-left: 0.3125em;
-        flex-wrap: nowrap;
+      .controller__actions-container {
+        position: relative;
+        padding: 0 0.3125em;
         vertical-align: middle;
         user-select: none;
+        cursor: pointer;
       }
 
-      .controller__action-item {
-        cursor: pointer;
-        width: 1em;
-        height: 1em;
-        margin: 0.125em;
+      .controller__actions-container:focus {
+        outline: none;
+      }
+
+      .controller--has-children .controller__actions-container {
+        margin-right: 1em;
+      }
+
+      .controller__actions-button {
+        display: flex;
+        height: calc(0.75em + 6px);
+        flex-direction: column;
+        justify-content: space-between;
+        touch-action: none;
+        pointer-events: none;
+      }
+
+      .controller__actions-button-dot {
+        width: 0.25em;
+        height: 0.25em;
+        border-radius: 50%;
+        background: hsla(var(--on-surface), 0.5);
+      }
+
+      .controller__actions-menu {
+        display: none;
+        overflow: hidden;
+        position: absolute;
+        top: calc(100% + 0.25em);
+        right: 0.3125em;
+        padding: 0.5em 0;
+        border-radius: 0.25em;
+        background: hsl(var(--surface));
+        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+        z-index: 1;
+      }
+
+      .controller__actions-container:focus .controller__actions-menu {
+        display: initial;
+      }
+
+      .controller__action {
         display: inline-block;
-        vertical-align: middle;
+        box-sizing: border-box;
+        padding: 0 1em;
+        min-width: 7em;
+        line-height: 3em;
+        cursor: pointer;
+      }
+
+      .controller__action:hover {
+        background: hsl(var(--primary), 0.08);
+      }
+
+      .controller__action:active {
+        background: hsl(var(--primary), 0.16);
       }
 
       .controller--has-children .controller__children {
@@ -168,7 +231,7 @@ class ThatController extends LitElement {
 
       @media (hover: none) {
         .controller--active {
-          transition-delay: 0.2s;
+          transition-delay: 0.1s;
         }
 
         @media (max-width: 1000px) {
@@ -228,6 +291,7 @@ class ThatController extends LitElement {
           ${this.hasChildNodes()
             ? html`
                 <div
+                  tabindex="0"
                   class=${classMap({ 'controller__minimise-arrow-container': true })}
                   @click=${this.type != 'title'
                     ? () => {
@@ -243,37 +307,39 @@ class ThatController extends LitElement {
                   ></div>
                 </div>
               `
-            : ''}
+            : undefined}
           <div
             class=${classMap({
               'controller__form-component-container': true,
               'controller__form-component-container--childless-title': !this.hasChildNodes() && this.type == 'title',
             })}
           >
-            ${this.appendForm()}
-            <slot name="_component"></slot>
+            ${this.component}
           </div>
-          ${this.hideActions
-            ? ''
+          ${this.hideActions || Object.keys(this.actions).length == 0
+            ? undefined
             : html`
-                <div class=${classMap({ controller__actions: true })}>
-                  ${this.actions.map(
-                    action =>
-                      html`
-                        <div
-                          class=${classMap({ 'controller__action-item': true })}
-                          @click=${() => {
-                            action[0](this)
-                          }}
-                        >
-                          ${typeof action[1] == 'object'
-                            ? action[1]
-                            : html`
-                                <img src=${action[1]} />
-                              `}
-                        </div>
-                      `,
-                  )}
+                <div tabindex="0" class=${classMap({ 'controller__actions-container': true })}>
+                  <div class=${classMap({ 'controller__actions-button': true })}>
+                    <div class=${classMap({ 'controller__actions-button-dot': true })}></div>
+                    <div class=${classMap({ 'controller__actions-button-dot': true })}></div>
+                    <div class=${classMap({ 'controller__actions-button-dot': true })}></div>
+                  </div>
+                  <div class=${classMap({ 'controller__actions-menu': true })}>
+                    ${Object.keys(this.actions).map(
+                      key =>
+                        html`
+                          <div
+                            class=${classMap({ controller__action: true })}
+                            @click=${() => {
+                              this.actions[key](this)
+                            }}
+                          >
+                            ${key}
+                          </div>
+                        `,
+                    )}
+                  </div>
                 </div>
               `}
         </div>
@@ -281,63 +347,16 @@ class ThatController extends LitElement {
           id="children"
           class=${classMap({ controller__children: true, 'controller__children--minimise': this.minimise })}
         >
-          <slot name=${this.type == 'tabswitch' ? this.value : ''}></slot>
+          <slot name=${this.switch ? this.component.value : ''}></slot>
         </div>
       </div>
     `
   }
 
   firstUpdated(changedProperties) {
-    this.initialValue = this.value
-
-    if (changedProperties.has('type')) {
-      switch (this.type) {
-        case 'number':
-          if (!changedProperties.has('min')) this.min = 0
-          if (!changedProperties.has('max'))
-            this.max = this.initialValue > 1 ? Math.pow(10, this.initialValue.toString().length) : 1
-          if (!changedProperties.has('step')) this.step = this.initialValue > 1 ? 1 : 0.001
-          break
-
-        case 'tabswitch':
-          if (!changedProperties.has('hideActions')) this.hideActions = true
-          break
-
-        default:
-          if (!changedProperties.has('min')) this.min = 0
-          if (!changedProperties.has('max')) this.max = 0
-          if (!changedProperties.has('step')) this.step = 0
-      }
-
-      if (!['title'].includes(this.type) && !this.type.includes('function')) {
-        this.actions = [
-          ...this.actions,
-          [
-            controller => {
-              controller.updateValue(controller.initialValue)
-            },
-            html`
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
-                <path
-                  d="M72,36A36,36,0,0,1,0,36H3.79a32.11,32.11,0,1,0,9.47-22.73L16.92,17H6.82V6.85l3.66,3.67a36.18,36.18,0,0,1,51,0A36.55,36.55,0,0,1,72,36Z"
-                />
-              </svg>
-            `,
-          ],
-          [
-            controller => {
-              console.log(controller.value)
-            },
-            html`
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
-                <path
-                  d="M72,41.87V30.13H65.33a31.65,31.65,0,0,0-4.4-10.8l4.54-4.53-8.4-8.4-4.54,4.53a28.55,28.55,0,0,0-10.8-4.4V0H30V6.53a31.85,31.85,0,0,0-10.8,4.4L14.67,6.4,6.4,14.67l4.53,4.53A28.62,28.62,0,0,0,6.53,30H0V41.73H6.53a31.77,31.77,0,0,0,4.4,10.8L6.4,57.07l8.4,8.4,4.53-4.54a28.36,28.36,0,0,0,10.8,4.4V72H41.87V65.33a31.65,31.65,0,0,0,10.8-4.4l4.53,4.54,8.4-8.4-4.53-4.54a28.55,28.55,0,0,0,4.4-10.8ZM36,55.73A19.8,19.8,0,1,1,55.73,35.87h0A19.71,19.71,0,0,1,36.16,55.73H36Z"
-                />
-              </svg>
-            `,
-          ],
-        ]
-      }
+    if (this.switch) {
+      if (!changedProperties.has('hideActions')) this.hideActions = true
+      if (changedProperties.has('component')) this.component.addEventListener('change', event => this.requestUpdate())
     }
 
     this.updateComplete.then(() => {
@@ -345,32 +364,27 @@ class ThatController extends LitElement {
     })
   }
 
-  updated(changedProperties) {
-    if (changedProperties.has('value')) this.dispatchEvent(new Event('change'))
+  setActive(active) {
+    const containerElem = this.shadowRoot.getElementById('controller')
+    const activeLeftPosition = 1 - this.path.split('.').length
+    if (active && this.hasChildNodes() && !this.minimise) {
+      containerElem.classList.add('controller--active')
+      containerElem.style.width = `${this.gui.container.shadowRoot.firstElementChild.clientWidth - 40}px`
+      containerElem.style.left = `${activeLeftPosition}em`
+    } else {
+      containerElem.classList.remove('controller--active')
+      containerElem.style.width = ''
+      containerElem.style.left = ''
+    }
   }
 
   setupEventListeners() {
-    const containerElem = this.shadowRoot.getElementById('controller')
-    const activeLeftPosition = 1 - this.path.split('.').length
-
-    const setActive = active => {
-      if (active && this.hasChildNodes() && !this.minimise) {
-        containerElem.classList.add('controller--active')
-        containerElem.style.width = `${this.gui.container.shadowRoot.firstElementChild.clientWidth}px`
-        containerElem.style.left = `${activeLeftPosition}em`
-      } else {
-        containerElem.classList.remove('controller--active')
-        containerElem.style.width = ''
-        containerElem.style.left = ''
-      }
-    }
-
     const handleOver = event => {
       if (
         event.target == this ||
         ((!event.target.hasChildNodes() || event.target.minimise) && event.target.parentElement == this)
       ) {
-        setActive(true)
+        this.setActive(true)
         this.addEventListener('mouseout', handleOut)
       }
     }
@@ -380,165 +394,18 @@ class ThatController extends LitElement {
         event.target == this ||
         ((!event.target.hasChildNodes() || event.target.minimise) && event.target.parentElement == this)
       ) {
-        setActive(false)
+        this.setActive(false)
         this.removeEventListener('mouseout', handleOut)
       }
     }
 
     this.addEventListener('mouseover', handleOver)
-    this.addEventListener('focusin', event => {
-      if (!Array.prototype.some.call(this.children, element => element.hasChildNodes())) setActive(true)
-    })
-    this.addEventListener('focusout', event => {
-      if (!Array.prototype.some.call(this.children, element => element.hasChildNodes())) setActive(false)
-    })
+    this.addEventListener('focus', event => (this.hasChildNodes() ? this : this.parentElement).setActive(true))
+    this.addEventListener('blur', event => (this.hasChildNodes() ? this : this.parentElement).setActive(false))
     this.addEventListener('minimisetoggled', event => {
-      setActive(!this.minimise)
-      this.minimise
-        ? this.parentElement.dispatchEvent(new Event('mouseover'))
-        : this.parentElement.dispatchEvent(new Event('mouseout'))
+      this.setActive(!this.minimise)
+      if (this.parentElement.tagName == 'THAT-CONTROLLER') this.parentElement.setActive(this.minimise)
     })
-  }
-
-  appendForm() {
-    const type = this.type.split(' ')
-    switch (type[0]) {
-      case 'number':
-        return html`
-          <that-slider
-            .min=${this.min}
-            .max=${this.max}
-            .step=${this.step}
-            .maxValue=${this.value}
-            .label=${this.label}
-            @change=${event => {
-              this.updateValue(Number(event.target.maxValue))
-            }}
-            style=${styleMap({ width: 'initial' })}
-          ></that-slider>
-        `
-
-      case 'range':
-        return html`
-          <that-slider
-            .min=${this.min}
-            .max=${this.max}
-            .step=${this.step}
-            .minValue=${this.value[0]}
-            .maxValue=${this.value[1]}
-            .label=${this.label}
-            @change=${event => {
-              this.updateValue([Number(event.target.minValue), Number(event.target.maxValue)])
-            }}
-            style=${styleMap({ width: 'initial' })}
-          ></that-slider>
-        `
-
-      case 'input':
-      case 'string':
-        return html`
-          <that-input
-            .value=${this.value}
-            .label=${this.label}
-            @change=${typeof this.value == 'number'
-              ? event => {
-                  const newValue = Number(event.srcElement.value)
-                  if (!isNaN(newValue)) this.updateValue(newValue)
-                }
-              : event => {
-                  this.updateValue(event.srcElement.value)
-                }}
-          ></that-input>
-        `
-      case 'menu':
-        return html`
-          <that-menu
-            .value=${String(this.value)}
-            .label=${this.label}
-            .options=${this.options}
-            @change=${event => {
-              this.updateValue(event.srcElement.value)
-            }}
-            style=${styleMap({ width: '100%' })}
-          ></that-menu>
-        `
-
-      case 'tabs':
-      case 'tabswitch':
-        return html`
-          <that-tabbar
-            .value=${String(this.value)}
-            .label=${this.label}
-            .options=${this.options}
-            @change=${event => {
-              this.updateValue(event.srcElement.value)
-            }}
-          ></that-tabbar>
-        `
-
-      case 'boolean':
-        return html`
-          <that-checkbox
-            .value=${Boolean(this.value)}
-            .label=${this.label}
-            @change=${event => {
-              this.updateValue(event.srcElement.value)
-            }}
-            style=${styleMap({ float: 'left' })}
-          ></that-checkbox>
-        `
-
-      case 'function':
-        type.shift()
-        return html`
-          <that-button @click=${this.value} .icon=${this.icon} .type=${type}>${this.label}</that-button>
-        `
-      case 'functionArray':
-        const buttons = []
-        for (const i in this.value) {
-          buttons.push(html`
-            <that-button
-              @click=${this.value[i]}
-              .icon=${this.options[i].icon || undefined}
-              .type=${this.options[i].type ? this.options[i].type.split(' ') : []}
-              style=${styleMap({ flexGrow: 1 })}
-            >
-              ${this.options[i].label || i}
-            </that-button>
-          `)
-        }
-        return html`
-          <div
-            style=${styleMap({
-              display: 'flex',
-              flexWrap: 'wrap',
-            })}
-          >
-            ${buttons}
-          </div>
-        `
-
-      case 'title':
-        return this.value != undefined && typeof this.value != 'object' ? this.value : this.label
-
-      case 'color':
-        return html`
-          <that-color-picker
-            .value=${this.value}
-            .label=${this.label}
-            .swatches=${this.options ? this.options : []}
-            @change=${event => {
-              this.updateValue(event.srcElement.value)
-            }}
-          ></that-color-picker>
-        `
-
-      default:
-        return html`
-          ${this.label}
-          <br /><span style="color: red;">ERROR: Controller type '${type[0]}' is not supported</span>
-        `
-    }
   }
 
   setMinimised(minimise) {
@@ -550,15 +417,6 @@ class ThatController extends LitElement {
         },
       }),
     )
-  }
-
-  updateValue(newValue) {
-    this.value = newValue
-    if (typeof this.object[this.key] == 'object' && !['range', 'color'].includes(this.type)) {
-      this.object[this.key].__value = newValue
-    } else {
-      this.object[this.key] = newValue
-    }
   }
 }
 

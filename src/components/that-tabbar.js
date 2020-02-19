@@ -1,10 +1,10 @@
 import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
+import { styleMap } from 'lit-html/directives/style-map'
 
 class ThatTabBar extends LitElement {
   constructor() {
     super()
-    this.value = ''
     this.options = []
     this.currentIndex_ = -1
   }
@@ -42,6 +42,7 @@ class ThatTabBar extends LitElement {
         line-height: 3em;
         text-align: center;
         user-select: none;
+        color: hsla(var(--on-surface), 0.7);
         transition: background-color 0.2s;
       }
 
@@ -62,6 +63,7 @@ class ThatTabBar extends LitElement {
       }
 
       .tabbar__option--active {
+        color: hsla(var(--primary));
         border-bottom: 0.125em solid hsla(var(--primary), 0.6);
       }
     `
@@ -79,6 +81,7 @@ class ThatTabBar extends LitElement {
                 'tabbar__option--selected': this.currentIndex_ == index,
                 'tabbar__option--active': this.value == option,
               })}
+              style=${styleMap({ width: 100 / this.options.length + '%' })}
               @click=${event => {
                 this.value = this.options[index]
                 this.currentIndex_ = index

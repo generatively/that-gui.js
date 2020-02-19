@@ -5,7 +5,6 @@ import { styleMap } from 'lit-html/directives/style-map'
 class ThatSlider extends LitElement {
   constructor() {
     super()
-    this.maxValue = 0
     this.min = 0
     this.max = 100
     this.step = 0.1
@@ -239,7 +238,7 @@ class ThatSlider extends LitElement {
                   </div>
                 </div>
               `
-            : ''}
+            : undefined}
           <div
             class=${classMap({ 'slider__thumb-container': true })}
             style=${styleMap({ left: `${this.scale_(this.maxValue, this.min, this.max, 0, 100)}%` })}
@@ -254,7 +253,7 @@ class ThatSlider extends LitElement {
         </div>
       </div>
       ${this.hideValueTextField
-        ? ''
+        ? undefined
         : html`
             <input
               .value=${this.currentThumb_ ? this.maxValue : this.minValue}
