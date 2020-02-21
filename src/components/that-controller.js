@@ -93,7 +93,7 @@ class ThatController extends LitElement {
       }
 
       .controller__minimise-arrow-container::after {
-        content: "";
+        content: '';
         position: absolute;
         top: 50%;
         left: 50%;
@@ -186,11 +186,11 @@ class ThatController extends LitElement {
         overflow: hidden;
         position: absolute;
         top: calc(100% + 0.25em);
-        right: 0.3125em;
+        right: -0.125em;
         padding: 0.5em 0;
         border-radius: 0.25em;
         background: hsl(var(--surface));
-        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
         z-index: 1;
       }
 
