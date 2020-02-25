@@ -91,7 +91,7 @@ class ThatCheckbox extends LitElement {
 
       .checkbox:not(.checkbox--checked):focus .checkbox__focus-ring,
       .checkbox:not(.checkbox--checked):active .checkbox__active-ring {
-        background: hsla(var(--on-surface), 0.188);
+        background: hsla(var(--on-surface), 0.1);
       }
 
       .checkbox__box {

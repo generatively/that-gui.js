@@ -1,5 +1,6 @@
 import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
+import { styleMap } from 'lit-html/directives/style-map'
 
 class ThatController extends LitElement {
   constructor() {
@@ -54,7 +55,7 @@ class ThatController extends LitElement {
       }
 
       .controller--has-children {
-        border: 1px solid hsla(var(--on-surface), 0.1);
+        box-shadow: 0 0 0 1px hsla(var(--on-surface), 0.1);
         background: hsl(var(--surface));
       }
 
@@ -63,7 +64,6 @@ class ThatController extends LitElement {
       }
 
       .controller--open {
-        border: none;
         box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
       }
 
@@ -271,6 +271,7 @@ class ThatController extends LitElement {
           'controller--open': !this.minimise && this.hasChildNodes(),
           'controller--has-children': this.hasChildNodes(),
         })}
+        style=${styleMap({ overflow: this.switch && this.type == 'tabs' ? 'hidden' : '' })}
       >
         <div
           title="${this.path}"
@@ -309,6 +310,7 @@ class ThatController extends LitElement {
               'controller__form-component-container': true,
               'controller__form-component-container--childless-title': !this.hasChildNodes() && this.type == 'title',
             })}
+            style=${styleMap({ padding: this.switch && this.type == 'tabs' ? '0' : '' })}
           >
             ${this.component}
           </div>
