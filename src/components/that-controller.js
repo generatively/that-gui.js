@@ -398,8 +398,20 @@ class ThatController extends LitElement {
     }
 
     this.addEventListener('mouseover', handleOver)
-    this.addEventListener('focus', event => (this.hasChildNodes() ? this : this.parentElement).setActive(true))
-    this.addEventListener('blur', event => (this.hasChildNodes() ? this : this.parentElement).setActive(false))
+    this.addEventListener('focus', event =>
+      this.hasChildNodes()
+        ? this.setActive(true)
+        : this.parentElement != this.gui.container
+        ? this.parentElement.setActive(true)
+        : undefined,
+    )
+    this.addEventListener('blur', event =>
+      this.hasChildNodes()
+        ? this.setActive(false)
+        : this.parentElement != this.gui.container
+        ? this.parentElement.setActive(false)
+        : undefined,
+    )
     this.addEventListener('minimisetoggled', event => {
       this.setActive(!this.minimise)
       if (this.parentElement.tagName == 'THAT-CONTROLLER') this.parentElement.setActive(this.minimise)
