@@ -1,4 +1,4 @@
-export const componentFactory = {
+const componentFactory = {
   title(properties) {
     const elem = document.createElement('span')
     elem.innerText =
@@ -21,9 +21,15 @@ export const componentFactory = {
     elem.style.width = 'initial'
 
     controllerElement.actions = {
+      reset: () => {
+        elem.maxValue = properties.value
+        elem.dispatchEvent(new Event('change'))
+      },
+      randomise: () => {
+        elem.maxValue = Math.random() * (elem.max + Math.abs(elem.min)) + elem.min
+        elem.dispatchEvent(new Event('change'))
+      },
       ...controllerElement.actions,
-      reset: () => (elem.maxValue = properties.value),
-      randomise: () => (elem.maxValue = Math.random() * (elem.max + Math.abs(elem.min)) + elem.min),
     }
 
     return elem
@@ -44,15 +50,17 @@ export const componentFactory = {
     elem.style.width = 'initial'
 
     controllerElement.actions = {
-      ...controllerElement.actions,
       reset: () => {
         elem.minValue = properties.value[0]
         elem.maxValue = properties.value[1]
+        elem.dispatchEvent(new Event('change'))
       },
       randomise: () => {
         elem.minValue = Math.random() * (elem.max + Math.abs(elem.min)) + elem.min
         elem.maxValue = Math.random() * (elem.max + Math.abs(elem.min)) + elem.min
+        elem.dispatchEvent(new Event('change'))
       },
+      ...controllerElement.actions,
     }
 
     return elem
@@ -61,14 +69,39 @@ export const componentFactory = {
     const elem = document.createElement('that-input')
     elem.value = properties.value
     elem.label = properties.label
+    elem.min = properties.min
+    elem.max = properties.max
+    elem.step = properties.step
     elem.addEventListener('change', event => {
       properties.object[properties.key] = event.target.value
     })
     elem.style.width = '100%'
 
-    controllerElement.actions = { ...controllerElement.actions, reset: () => (elem.value = properties.value) }
+    controllerElement.actions = { reset: () => (elem.value = properties.value), ...controllerElement.actions }
+    if (typeof properties.value == 'number' && !controllerElement.actions.randomise)
+      controllerElement.actions.randomise = () =>
+        (elem.value = Math.random() * (elem.max + Math.abs(elem.min)) + elem.min)
 
     return elem
+  },
+  //temp - need to write a custom component for this
+  textArea(properties, controllerElement) {
+    const elem = document.createElement('textarea')
+    const labelElem = document.createElement('span')
+
+    elem.value = properties.value
+    elem.addEventListener('change', event => {
+      properties.object[properties.key] = event.target.value
+    })
+    elem.style.width = '100%'
+    elem.style.borderRadius = '0.25em'
+    elem.style.resize = 'vertical'
+
+    labelElem.innerText = properties.label
+
+    controllerElement.actions = { reset: () => (elem.value = properties.value), ...controllerElement.actions }
+
+    return [labelElem, elem]
   },
   boolean(properties, controllerElement) {
     const elem = document.createElement('that-checkbox')
@@ -80,9 +113,9 @@ export const componentFactory = {
     elem.style.float = 'left'
 
     controllerElement.actions = {
-      ...controllerElement.actions,
       reset: () => (elem.value = properties.value),
       randomise: () => (elem.value = Math.random() < 0.5),
+      ...controllerElement.actions,
     }
 
     return elem
@@ -106,9 +139,9 @@ export const componentFactory = {
     elem.style.width = '100%'
 
     controllerElement.actions = {
-      ...controllerElement.actions,
       reset: () => (elem.value = properties.value),
       randomise: () => (elem.value = elem.options[Math.floor(Math.random() * elem.options.length)]),
+      ...controllerElement.actions,
     }
 
     return elem
@@ -123,9 +156,9 @@ export const componentFactory = {
     })
 
     controllerElement.actions = {
-      ...controllerElement.actions,
       reset: () => (elem.value = properties.value),
       randomise: () => (elem.value = elem.options[Math.floor(Math.random() * elem.options.length)]),
+      ...controllerElement.actions,
     }
 
     return elem
@@ -140,7 +173,6 @@ export const componentFactory = {
     })
 
     controllerElement.actions = {
-      ...controllerElement.actions,
       reset: () => (elem.value = properties.value),
       randomise: () => {
         elem.h = Math.random()
@@ -148,6 +180,7 @@ export const componentFactory = {
         elem.l = Math.random()
         elem.a = elem.noAlpha ? 1 : Math.round(Math.random() * 1000) / 1000
       },
+      ...controllerElement.actions,
     }
 
     return elem
@@ -156,8 +189,12 @@ export const componentFactory = {
     const elem = document.createElement('span')
     elem.innerText = 'REQUIRES IMPLEMENTATION'
 
-    controllerElement.actions = { ...controllerElement.actions, reset: () => (elem.value = properties.value) }
+    controllerElement.actions = { reset: () => (elem.value = properties.value), ...controllerElement.actions }
 
     return elem
   },
 }
+
+componentFactory.input = componentFactory.string
+
+export { componentFactory }

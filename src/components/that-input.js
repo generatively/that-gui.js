@@ -29,7 +29,7 @@ class ThatInput extends LitElement {
 
   set value(value) {
     const oldValue = this.__value
-    this.__value = (this.type == 'number') ? Math.ceil(parseFloat(value) / this.step) * this.step : value
+    this.__value = (this.type == 'number') ? parseFloat(value) : value
     this.requestUpdate('value', oldValue)
   }
 
@@ -124,12 +124,6 @@ class ThatInput extends LitElement {
   firstUpdated(changedProperties) {
     if (changedProperties.has('value')) {
       this.type = typeof this.value
-    }
-    
-    if (this.type == 'number') {
-      this.min = 0
-      this.max = this.value > 1 ? Math.pow(10, this.value.toString().length) : 1
-      this.step = this.value > 1 ? 1 : 0.001
     }
   }
 

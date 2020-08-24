@@ -9,7 +9,7 @@ export class ThatGui {
       document.getElementById(options.parent).append(this.container)
     } else {
       document.body.append(this.container)
-      this.container.style.width = `${options.width}px`
+      this.container.width = options.width
     }
     this.componentFactory = { ...componentFactory, ...options.componentFactory }
     this.theme = {
@@ -74,12 +74,16 @@ export class ThatGui {
       let type = 'object'
       if (properties.type == undefined) {
         if (Array.isArray(object)) {
-          type = typeof object[0]
-          for (const item of object) {
-            if (type != typeof item) {
-              type = 'object'
-              break
+          if (object.length > 0) {
+            type = typeof object[0]
+            for (const item of object) {
+              if (type != typeof item) {
+                type = 'object'
+                break
+              }
             }
+          } else {
+            type = 'object'
           }
         }
       } else {
@@ -114,7 +118,13 @@ export class ThatGui {
       properties.value = object
     }
 
-    if (!properties.type) properties.type = properties.value != undefined ? typeof properties.value : 'title'
+    if (!properties.type)
+      properties.type =
+        properties.value == undefined
+          ? 'title'
+          : String(properties.value).charAt(0) == '#'
+          ? 'color'
+          : typeof properties.value
 
     for (const prop in properties) controllerElement[prop] = properties[prop]
 
@@ -143,9 +153,9 @@ export class ThatGui {
   }
 
   refresh(startPointKey = '') {
-    if (startPointKey.length > 0) {
+    if (startPointKey) {
       const topControllerIndex = Array.prototype.indexOf.call(
-        this.controllerElements[startPointKey].parentNode.children,
+        this.controllerElements[startPointKey].parentElement.children,
         this.controllerElements[startPointKey],
       )
 

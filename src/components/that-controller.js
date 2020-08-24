@@ -271,7 +271,6 @@ class ThatController extends LitElement {
           'controller--open': !this.minimise && this.hasChildNodes(),
           'controller--has-children': this.hasChildNodes(),
         })}
-        style=${styleMap({ overflow: this.switch && this.type == 'tabs' ? 'hidden' : '' })}
       >
         <div
           title="${this.path}"
@@ -310,7 +309,13 @@ class ThatController extends LitElement {
               'controller__form-component-container': true,
               'controller__form-component-container--childless-title': !this.hasChildNodes() && this.type == 'title',
             })}
-            style=${styleMap({ padding: this.switch && this.type == 'tabs' ? '0' : '' })}
+            style=${this.switch && this.type == 'tabs'
+              ? styleMap({
+                  padding: '0',
+                  overflow: 'hidden',
+                  borderRadius: '0 0.5em 0 0',
+                })
+              : undefined}
           >
             ${this.component}
           </div>
@@ -367,7 +372,7 @@ class ThatController extends LitElement {
     const activeLeftPosition = 1 - this.path.split('.').length
     if (active && this.hasChildNodes() && !this.minimise) {
       containerElem.classList.add('controller--active')
-      containerElem.style.width = `${this.gui.container.shadowRoot.firstElementChild.clientWidth - 40}px`
+      containerElem.style.width = `${this.gui.container.shadowRoot.getElementById('container').clientWidth - 40}px`
       containerElem.style.left = `${activeLeftPosition}em`
     } else {
       containerElem.classList.remove('controller--active')

@@ -74,14 +74,21 @@ class ThatColorPicker extends LitElement {
   }
 
   set hex(value) {
-    const rgbArray = value
-      .slice(1)
-      .match(/.{2}/g)
-      .map(val => {
-        return parseInt(val, 16) / 255
-      })
-    this.a = rgbArray.length == 4 ? rgbArray.pop() : 1
-    this._setHSLFromRGB(rgbArray)
+    if (value.toUpperCase() != '#FFFFFF') {
+      const rgbArray = value
+        .slice(1)
+        .match(/.{2}/g)
+        .map(val => {
+          return parseInt(val, 16) / 255
+        })
+      this.a = rgbArray.length == 4 ? rgbArray.pop() : 1
+      this._setHSLFromRGB(rgbArray)
+    } else {
+      if (!this.h) this.h = 0
+      if (!this.s) this.s = 0
+      this.l = 1
+      this.a = 1
+    }
   }
 
   get value() {
@@ -421,6 +428,7 @@ class ThatColorPicker extends LitElement {
         <div class=${classMap({ 'color__settings-container': true })}>
           <that-tabbar
             value=${this._currentTab}
+            even-widths
             @change=${event => (this._currentTab = event.target.value)}
             .options=${['PICKER', 'OPTIONS', 'SWATCHES']}
             class=${classMap({ color__tabbar: true })}

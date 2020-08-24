@@ -7,12 +7,14 @@ class ThatTabBar extends LitElement {
     super()
     this.options = []
     this.currentIndex_ = -1
+    this.evenWidths = false
   }
 
   static get properties() {
     return {
       value: { type: String },
       options: { type: Array },
+      evenWidths: { type: Boolean, attribute: 'even-widths' },
       currentIndex_: { type: Number },
     }
   }
@@ -81,7 +83,7 @@ class ThatTabBar extends LitElement {
                 'tabbar__option--selected': this.currentIndex_ == index,
                 'tabbar__option--active': this.value == option,
               })}
-              style=${styleMap({ width: 100 / this.options.length + '%' })}
+              style=${styleMap({ width: this.evenWidths ? 100 / this.options.length + '%' : '' })}
               @click=${event => {
                 this.value = this.options[index]
                 this.currentIndex_ = index
