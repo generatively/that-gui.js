@@ -102,6 +102,7 @@ export class ThatGui {
         properties.value = keys[0]
 
         for (const childKey in object) {
+          if (childKey.startsWith('_')) continue
           const childObject = object[childKey]
           for (const grandChildKey in childObject) {
             const elem = this.addController(grandChildKey, childObject, `${pathKey}.${childKey}`)
