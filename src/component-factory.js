@@ -152,7 +152,11 @@ const componentFactory = {
     elem.options = properties.options
     elem.label = properties.label
     elem.addEventListener('change', event => {
-      properties.object[properties.key] = event.target.value
+      if (properties.switch) {
+        properties.object[properties.key].__value = event.target.value
+      } else {
+        properties.object[properties.key] = event.target.value
+      }
     })
 
     controllerElement.actions = {
