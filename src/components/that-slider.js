@@ -216,7 +216,9 @@ class ThatSlider extends LitElement {
             style=${styleMap({
               left: this.minValue != undefined ? `${this.scale_(this.minValue, this.min, this.max, 0, 100)}%` : '',
               transform: `scaleX(${this.scale_(
-                this.maxValue - (this.minValue != undefined ? this.minValue : 0),
+                this.minValue == undefined
+                  ? this.maxValue
+                  : this.maxValue - this.minValue - (this.min < 0 ? this.max : 0),
                 this.min,
                 this.max,
                 0,
@@ -259,7 +261,7 @@ class ThatSlider extends LitElement {
               .value=${this.currentThumb_ ? this.maxValue : this.minValue}
               class=${classMap({ slider__input: true })}
               style=${styleMap({ width: `${String(this.step + this.max).length + (this.min < 0 ? 1.5 : 1)}ex` })}
-              @change=${event => {
+              @change=${(event) => {
                 const newValue = Number(event.target.value)
                 if (!isNaN(newValue)) this.updateValue_(newValue)
                 this.requestUpdate(this.currentThumb_ ? 'maxValue' : 'minValue')
@@ -315,11 +317,11 @@ class ThatSlider extends LitElement {
     const minThumbElem = this.shadowRoot.getElementById('min')
     const maxThumbElem = this.shadowRoot.getElementById('max')
 
-    const getMousePos = event => {
+    const getMousePos = (event) => {
       return event.type == 'touchmove' || event.type == 'touchstart' ? event.targetTouches[0].pageX : event.pageX
     }
 
-    const updateClosestThumb = event => {
+    const updateClosestThumb = (event) => {
       const mousePos = getMousePos(event)
       if (
         minThumbElem != undefined &&
@@ -338,7 +340,7 @@ class ThatSlider extends LitElement {
       }
     }
 
-    const handleMouseDown = event => {
+    const handleMouseDown = (event) => {
       if (event.buttons == 1) {
         updateClosestThumb(event)
         handleMove(event)
@@ -347,7 +349,7 @@ class ThatSlider extends LitElement {
       }
     }
 
-    const handleMouseUp = event => {
+    const handleMouseUp = (event) => {
       if (event.buttons == 0) {
         this.dispatchEvent(new Event('change'))
         document.removeEventListener('mousemove', handleMove)
@@ -355,30 +357,30 @@ class ThatSlider extends LitElement {
       }
     }
 
-    const handleMouseOver = event => {
+    const handleMouseOver = (event) => {
       sliderElem.addEventListener('wheel', handleWheel)
       sliderElem.addEventListener('mouseout', handleMouseOut)
     }
 
-    const handleMouseOut = event => {
+    const handleMouseOut = (event) => {
       sliderElem.removeEventListener('wheel', handleWheel)
       sliderElem.removeEventListener('mouseout', handleMouseOut)
     }
 
-    const handleTouchStart = event => {
+    const handleTouchStart = (event) => {
       updateClosestThumb(event)
       handleMove(event)
       sliderElem.addEventListener('touchmove', handleMove)
       sliderElem.addEventListener('touchend', handleTouchEnd)
     }
 
-    const handleTouchEnd = event => {
+    const handleTouchEnd = (event) => {
       this.dispatchEvent(new Event('change'))
       sliderElem.removeEventListener('touchmove', handleMove)
       sliderElem.removeEventListener('touchend', handleTouchEnd)
     }
 
-    const handleWheel = event => {
+    const handleWheel = (event) => {
       if (event.altKey) {
         event.preventDefault()
         updateClosestThumb(event)
@@ -389,7 +391,7 @@ class ThatSlider extends LitElement {
       }
     }
 
-    const handleKeyDown = event => {
+    const handleKeyDown = (event) => {
       if (
         !['Escape', 'ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', 'PageUp', 'PageDown', 'Home', 'End'].includes(
           event.key,
@@ -437,7 +439,7 @@ class ThatSlider extends LitElement {
       this.updateValue_(this[this.currentThumb_ ? 'maxValue' : 'minValue'] + stepAmount)
     }
 
-    const handleMove = event => {
+    const handleMove = (event) => {
       const pos =
         getMousePos(event) -
         trackElem.getBoundingClientRect().left +
