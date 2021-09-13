@@ -37,6 +37,7 @@ export class ThatGui {
 
   add(objects) {
     for (const key in objects) {
+      if (key.startsWith('_')) continue
       this.objects[key] = objects[key]
       this.addController(key, objects)
     }
