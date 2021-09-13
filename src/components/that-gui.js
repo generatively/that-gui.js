@@ -65,35 +65,20 @@ class ThatGuiComponent extends LitElement {
         position: fixed;
         top: 50%;
         right: 0;
-        width: 2em;
-        height: 4em;
-        border-radius: 2em 0 0 2em;
-        transform: translateY(-50%);
+        width: 1.5em;
+        height: 3em;
+        border-radius: 1.5em 0 0 1.5em;
+        transform: translateY( -50%);
+        transform-origin: center right;
         background: white;
         box-shadow: -2.5px 0 4px -2px hsla(0deg, 0%, 0%, 0.4);
         cursor: pointer;
-        transition: width 0.2s, height 0.2s, border-radius 0.2s, right 0.5s;
-      }
-
-      .minimise-button::after {
-        content: '>';
-        position: absolute;
-        top: 50%;
-        left: 65%;
-        transform: translate(-50%, -50%);
-        transition: font-size 0.2s;
-      }
-
-      .minimise-button--minimised::after {
-        content: '<';
+        transition: width 0.2s, right 0.5s;
       }
 
       .minimise-button:focus,
       .minimise-button:hover {
-        font-size: 2em;
-        width: 3rem;
-        height: 6rem;
-        border-radius: 3rem 0 0 3rem;
+        width: 2em;
       }
     `
   }
@@ -105,20 +90,20 @@ class ThatGuiComponent extends LitElement {
         class=${classMap({ container: true, 'container--has-parent': this.hasParent })}
         style=${styleMap({ width: `${this.width / 16}em`, right: this.minimised ? `-${this.width}px` : '' })}
       >
+        ${this.hasParent
+          ? undefined
+          : html`
+              <div
+                class=${classMap({ 'minimise-button': true, 'minimise-button--minimised': this.minimised })}
+                style=${styleMap({ right: this.minimised ? '' : `${this.width}px` })}
+                @click=${() => {
+                  this.minimised = !this.minimised
+                  this.dispatchEvent(new Event('minimisetoggled', { detail: { minimised: this.minimised } }))
+                }}
+              ></div>
+            `}
         <slot></slot>
       </div>
-      ${this.hasParent
-        ? undefined
-        : html`
-            <div
-              class=${classMap({ 'minimise-button': true, 'minimise-button--minimised': this.minimised })}
-              style=${styleMap({ right: this.minimised ? '' : `${this.width}px` })}
-              @click=${() => {
-                this.minimised = !this.minimised
-                this.dispatchEvent(new Event('minimisetoggled', { detail: { minimised: this.minimised } }))
-              }}
-            ></div>
-          `}
     `
   }
 }
