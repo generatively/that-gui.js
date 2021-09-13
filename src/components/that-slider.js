@@ -215,15 +215,10 @@ class ThatSlider extends LitElement {
             class=${classMap({ slider__bar: true })}
             style=${styleMap({
               left: this.minValue != undefined ? `${this.scale_(this.minValue, this.min, this.max, 0, 100)}%` : '',
-              transform: `scaleX(${this.scale_(
-                this.minValue == undefined
-                  ? this.maxValue
-                  : this.maxValue - this.minValue - (this.min < 0 ? this.max : 0),
-                this.min,
-                this.max,
-                0,
-                1,
-              )})`,
+              transform: `scaleX(${
+                this.scale_(this.maxValue, this.min, this.max, 0, 1) -
+                (this.minValue == undefined ? 0 : this.scale_(this.minValue, this.min, this.max, 0, 1))
+              })`,
             })}
           ></div>
           ${this.minValue != undefined
@@ -295,7 +290,7 @@ class ThatSlider extends LitElement {
   }
 
   scale_(number, inMin, inMax, outMin, outMax) {
-    return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin
+    return ((number - inMin) / (inMax - inMin)) * (outMax - outMin) + outMin
   }
 
   updateValue_(newValue) {
