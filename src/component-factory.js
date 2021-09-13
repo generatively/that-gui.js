@@ -15,9 +15,15 @@ const componentFactory = {
     elem.label = properties.label
     elem.updateContinuously = properties.updateContinuously || false
     elem.hideValueTextField = properties.hideValueTextField || false
-    elem.addEventListener('change', event => {
-      properties.object[properties.key] = event.target.maxValue
-    })
+    if (properties.hasChildren == undefined) {
+      elem.addEventListener('change', (event) => {
+        properties.object[properties.key] = event.target.maxValue
+      })
+    } else {
+      elem.addEventListener('change', (event) => {
+        properties.object[properties.key].__value = event.target.maxValue
+      })
+    }
     elem.style.width = 'initial'
 
     controllerElement.actions = {
@@ -43,7 +49,7 @@ const componentFactory = {
     elem.minValue = properties.value[0]
     elem.maxValue = properties.value[1]
     elem.label = properties.label
-    elem.addEventListener('change', event => {
+    elem.addEventListener('change', (event) => {
       properties.object[properties.key][0] = event.target.minValue
       properties.object[properties.key][1] = event.target.maxValue
     })
@@ -72,15 +78,17 @@ const componentFactory = {
     elem.min = properties.min
     elem.max = properties.max
     elem.step = properties.step
-    elem.addEventListener('change', event => {
+    elem.addEventListener('change', (event) => {
       properties.object[properties.key] = event.target.value
     })
     elem.style.width = '100%'
 
     controllerElement.actions = { reset: () => (elem.value = properties.value), ...controllerElement.actions }
     if (typeof properties.value == 'number' && !controllerElement.actions.randomise)
-      controllerElement.actions.randomise = () =>
-        (elem.value = Math.random() * (elem.max + Math.abs(elem.min)) + elem.min)
+      controllerElement.actions.randomise = () => {
+        elem.value = Math.ceil(Math.random() * 1000000000000000)
+        elem.dispatchEvent(new Event('change'))
+      }
 
     return elem
   },
@@ -90,7 +98,7 @@ const componentFactory = {
     const labelElem = document.createElement('span')
 
     elem.value = properties.value
-    elem.addEventListener('change', event => {
+    elem.addEventListener('change', (event) => {
       properties.object[properties.key] = event.target.value
     })
     elem.style.width = '100%'
@@ -107,7 +115,7 @@ const componentFactory = {
     const elem = document.createElement('that-checkbox')
     elem.value = properties.value
     elem.label = properties.label
-    elem.addEventListener('change', event => {
+    elem.addEventListener('change', (event) => {
       properties.object[properties.key] = event.target.value
     })
     elem.style.float = 'left'
@@ -133,7 +141,7 @@ const componentFactory = {
     elem.value = properties.value
     elem.options = properties.options
     elem.label = properties.label
-    elem.addEventListener('change', event => {
+    elem.addEventListener('change', (event) => {
       properties.object[properties.key] = event.target.value
     })
     elem.style.width = '100%'
@@ -151,7 +159,7 @@ const componentFactory = {
     elem.value = properties.value
     elem.options = properties.options
     elem.label = properties.label
-    elem.addEventListener('change', event => {
+    elem.addEventListener('change', (event) => {
       if (properties.switch) {
         properties.object[properties.key].__value = event.target.value
       } else {
@@ -159,10 +167,12 @@ const componentFactory = {
       }
     })
 
-    controllerElement.actions = {
-      reset: () => (elem.value = properties.value),
-      randomise: () => (elem.value = elem.options[Math.floor(Math.random() * elem.options.length)]),
-      ...controllerElement.actions,
+    if (!properties.switch) {
+      controllerElement.actions = {
+        reset: () => (elem.value = properties.value),
+        randomise: () => (elem.value = elem.options[Math.floor(Math.random() * elem.options.length)]),
+        ...controllerElement.actions,
+      }
     }
 
     return elem
@@ -172,7 +182,7 @@ const componentFactory = {
     elem.value = properties.value
     if (properties.options) elem.swatches = properties.options
     elem.label = properties.label
-    elem.addEventListener('change', event => {
+    elem.addEventListener('change', (event) => {
       properties.object[properties.key] = event.target.value
     })
 

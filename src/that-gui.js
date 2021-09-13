@@ -92,6 +92,8 @@ export class ThatGui {
       }
 
       if (type == 'object') {
+        properties.hasChildren = true
+        
         for (const childKey in object) this.addController(childKey, object, pathKey)
 
         if (object['__value'] != undefined) {
