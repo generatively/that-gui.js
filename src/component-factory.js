@@ -115,9 +115,17 @@ const componentFactory = {
     const elem = document.createElement('that-checkbox')
     elem.value = properties.value
     elem.label = properties.label
-    elem.addEventListener('change', (event) => {
-      properties.object[properties.key] = event.target.value
-    })
+
+    if (properties.hasChildren == undefined) {
+      elem.addEventListener('change', (event) => {
+        properties.object[properties.key] = event.target.value
+      })
+    } else {
+      elem.addEventListener('change', (event) => {
+        properties.object[properties.key].__value = event.target.value
+      })
+    }
+
     elem.style.float = 'left'
 
     controllerElement.actions = {
