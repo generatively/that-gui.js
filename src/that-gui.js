@@ -112,6 +112,10 @@ export class ThatGui {
             if (elem) controllerElement.appendChild(elem).slot = childKey
           }
         }
+
+        if (object['__value'] != undefined) {
+          properties.value = object['__value']
+        }
       } else if (type == 'color') {
         properties.value = { ...object }
       } else {
@@ -156,6 +160,7 @@ export class ThatGui {
     Object.keys(this.objects).forEach(key => this.remove(key))
   }
 
+  // TODO: refresh doesn't work with tabs...
   refresh(startPointKey = '') {
     if (startPointKey) {
       const topControllerIndex = Array.prototype.indexOf.call(
