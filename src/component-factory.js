@@ -7,11 +7,14 @@ const componentFactory = {
   },
   number(properties, controllerElement) {
     const elem = document.createElement('that-slider')
-    elem.min = properties.min || 0
-    elem.max =
-      properties.max || (properties.value > 1 ? Math.pow(10, properties.value.toString().split('.')[0].length) : 1)
+    elem.min = isNaN(properties.min) ? 0 : properties.min
+    elem.max = isNaN(properties.max)
+      ? properties.value > 1
+        ? Math.pow(10, properties.value.toString().split('.')[0].length)
+        : 1
+      : properties.max
     elem.step = properties.step || (properties.value > 1 ? 1 : 0.001)
-    elem.maxValue = properties.value || 1
+    elem.maxValue = isNaN(properties.value) ? 1 : properties.value
     elem.label = properties.label
     elem.updateContinuously = properties.updateContinuously || false
     elem.hideValueTextField = properties.hideValueTextField || false
@@ -42,9 +45,12 @@ const componentFactory = {
   },
   range(properties, controllerElement) {
     const elem = document.createElement('that-slider')
-    elem.min = properties.min || 0
-    elem.max =
-      properties.max || (properties.value > 1 ? Math.pow(10, properties.value.toString().split('.')[0].length) : 1)
+    elem.min = isNaN(properties.min) ? 0 : properties.min
+    elem.max = isNaN(properties.max)
+    ? properties.value > 1
+      ? Math.pow(10, properties.value.toString().split('.')[0].length)
+      : 1
+    : properties.max
     elem.step = properties.step || (properties.value > 1 ? 1 : 0.001)
     elem.minValue = properties.value[0]
     elem.maxValue = properties.value[1]
