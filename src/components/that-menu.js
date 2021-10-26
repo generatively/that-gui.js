@@ -4,7 +4,6 @@ import { classMap } from 'lit-html/directives/class-map'
 class ThatMenu extends LitElement {
   constructor() {
     super()
-    this.value = ''
     this.options = []
     this.open = false
   }
@@ -25,31 +24,30 @@ class ThatMenu extends LitElement {
         display: inline-block;
         font-size: 1em;
         width: 17.5em;
-        --primary: 98, 0, 238;
-        --surface: 255, 255, 255;
-        --on-surface: 0, 0, 0;
+        --primary: 265deg, 100%, 47%;
+        --surface: 0deg, 0%, 100%;
+        --on-surface: 0deg, 0%, 0%;
       }
 
       .menu {
         position: relative;
         box-sizing: border-box;
         height: 3.5em;
-        margin: 0 0.3em;
         border-radius: 0.25em 0.25em 0 0;
-        border-bottom: 0.0625em solid rgba(var(--on-surface), 0.6);
-        background: rgba(var(--on-surface), 0.039);
+        border-bottom: 0.0625em solid hsla(var(--on-surface), 0.6);
+        background: hsla(var(--on-surface), 0.039);
         transition: border 0.2s, background-color 0.2s;
         cursor: pointer;
       }
 
       .menu:hover {
-        background: rgba(var(--on-surface), 0.063);
+        background: hsla(var(--on-surface), 0.063);
       }
 
       .menu:focus {
         outline: none;
-        background: rgba(var(--on-surface), 0.102);
-        border-bottom: 0.125em solid rgba(var(--primary), 0.6);
+        background: hsla(var(--on-surface), 0.102);
+        border-bottom: 0.125em solid hsla(var(--primary), 0.6);
       }
 
       .menu__value {
@@ -60,7 +58,7 @@ class ThatMenu extends LitElement {
         height: calc(100% - 1.25em);
         font-size: inherit;
         line-height: 2.4em;
-        color: rgba(var(--on-surface), 0.871);
+        color: hsla(var(--on-surface), 0.871);
         border: none;
         background: none;
         text-align: left;
@@ -72,12 +70,12 @@ class ThatMenu extends LitElement {
         top: 50%;
         left: 0.75em;
         transform: translateY(-50%);
-        color: rgba(var(--on-surface), 0.6);
+        color: hsla(var(--on-surface), 0.6);
         transition: top 0.2s, transform 0.2s, font-size 0.2s, color 0.2s;
       }
 
       .menu:focus .menu__label {
-        color: rgba(var(--primary));
+        color: hsla(var(--primary));
       }
 
       .menu:focus .menu__label,
@@ -97,7 +95,7 @@ class ThatMenu extends LitElement {
         height: 0;
         border-left: 0.3em solid transparent;
         border-right: 0.3em solid transparent;
-        border-top: 0.3em solid rgba(var(--on-surface), 0.5);
+        border-top: 0.3em solid hsla(var(--on-surface), 0.5);
         transition: transform 0.2s linear, border-top-color 0.2s;
       }
 
@@ -106,7 +104,7 @@ class ThatMenu extends LitElement {
       }
 
       .menu:focus .menu__arrow {
-        border-top-color: rgb(var(--primary));
+        border-top-color: hsl(var(--primary));
       }
 
       .menu__option-container {
@@ -116,7 +114,7 @@ class ThatMenu extends LitElement {
         top: calc(100% + 0.125em);
         width: 100%;
         z-index: 1;
-        background: rgb(var(--surface));
+        background: hsl(var(--surface));
         border-radius: 0 0 0.25em 0.25em;
         box-shadow: 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12),
           0 5px 5px -3px rgba(0, 0, 0, 0.2);
@@ -135,15 +133,15 @@ class ThatMenu extends LitElement {
       }
 
       .menu__option:hover {
-        background: rgba(var(--on-surface), 0.06);
+        background: hsla(var(--on-surface), 0.06);
       }
 
       .menu__option:active {
-        background: rgba(var(--on-surface), 0.1);
+        background: hsla(var(--on-surface), 0.1);
       }
 
       .menu__option--selected {
-        background: rgba(var(--primary), 0.2);
+        background: hsla(var(--primary), 0.2);
       }
     `
   }
@@ -198,7 +196,7 @@ class ThatMenu extends LitElement {
         }}
       >
         <div class=${classMap({ menu__value: true })}>${this.value}</div>
-        <label class=${classMap({ menu__label: true, 'menu__label--float': this.value != '' })}>
+        <label class=${classMap({ menu__label: true, 'menu__label--float': this.value })}>
           ${this.label}
         </label>
         <div class=${classMap({ menu__arrow: true, 'menu__arrow--open': this.open })}></div>
@@ -222,7 +220,9 @@ class ThatMenu extends LitElement {
   }
 
   firstUpdated(changedProperties) {
-    if (changedProperties.has('value')) this.currentIndex_ = this.options.indexOf(this.value)
+    if (changedProperties.has('value')) {
+      this.currentIndex_ = this.options.indexOf(this.value)
+    }
   }
 
   updated(changedProperties) {

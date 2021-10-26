@@ -1,18 +1,20 @@
 import { LitElement, html, css } from 'lit-element'
 import { classMap } from 'lit-html/directives/class-map'
+import { styleMap } from 'lit-html/directives/style-map'
 
 class ThatTabBar extends LitElement {
   constructor() {
     super()
-    this.value = ''
     this.options = []
     this.currentIndex_ = -1
+    this.evenWidths = false
   }
 
   static get properties() {
     return {
       value: { type: String },
       options: { type: Array },
+      evenWidths: { type: Boolean, attribute: 'even-widths' },
       currentIndex_: { type: Number },
     }
   }
@@ -24,15 +26,14 @@ class ThatTabBar extends LitElement {
         width: 100%;
         font-size: 1em;
         cursor: pointer;
-        --primary: 98, 0, 238;
-        --surface: 255, 255, 255;
-        --on-surface: 0, 0, 0;
+        --primary: 265deg, 100%, 47%;
+        --surface: 0deg, 0%, 100%;
+        --on-surface: 0deg, 0%, 0%;
       }
 
       .tabbar {
         display: inline-flex;
         width: 100%;
-        padding: 0 0.3em;
         box-sizing: border-box;
       }
 
@@ -43,15 +44,16 @@ class ThatTabBar extends LitElement {
         line-height: 3em;
         text-align: center;
         user-select: none;
+        color: hsla(var(--on-surface), 0.7);
         transition: background-color 0.2s;
       }
 
       .tabbar__option:hover:not(.tabbar__option--selected) {
-        background: rgba(var(--on-surface), 0.06);
+        background: hsla(var(--on-surface), 0.06);
       }
 
       .tabbar__option:active:not(.tabbar__option--selected) {
-        background: rgba(var(--primary), 0.2);
+        background: hsla(var(--primary), 0.2);
       }
 
       .tabbar__option:focus {
@@ -59,11 +61,12 @@ class ThatTabBar extends LitElement {
       }
 
       .tabbar__option--selected {
-        background: rgba(var(--primary), 0.1);
+        background: hsla(var(--primary), 0.1);
       }
 
       .tabbar__option--active {
-        border-bottom: 0.125em solid rgba(var(--primary), 0.6);
+        color: hsla(var(--primary));
+        border-bottom: 0.125em solid hsla(var(--primary), 0.6);
       }
     `
   }
@@ -80,6 +83,7 @@ class ThatTabBar extends LitElement {
                 'tabbar__option--selected': this.currentIndex_ == index,
                 'tabbar__option--active': this.value == option,
               })}
+              style=${styleMap({ width: this.evenWidths ? 100 / this.options.length + '%' : '' })}
               @click=${event => {
                 this.value = this.options[index]
                 this.currentIndex_ = index

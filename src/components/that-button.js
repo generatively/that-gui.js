@@ -28,19 +28,19 @@ class ThatButton extends LitElement {
         user-select: none;
         min-width: 4em;
         height: 2.25em;
-        --primary: 98, 0, 238;
-        --primary-variant: 55, 0, 179;
-        --surface: 255, 255, 255;
-        --error: 176, 0, 32;
-        --on-primary: 255, 255, 255;
-        --on-surface: 0, 0, 0;
-        --on-error: 255, 255, 255;
+        --primary: 265deg, 100%, 47%;
+        --primary-variant: 258deg, 100%, 35%;
+        --surface: 0deg, 0%, 100%;
+        --error: 349deg, 100%, 35%;
+        --on-primary: 0deg, 0%, 100%;
+        --on-surface: 0deg, 0%, 0%;
+        --on-error: 0deg, 0%, 100%;
       }
 
       .button {
         height: 100%;
-        background: rgb(var(--surface));
-        color: rgb(var(--primary));
+        background: hsl(var(--surface));
+        color: hsl(var(--primary));
         border-radius: 0.25em;
         padding: 0 1em;
         text-align: center;
@@ -53,11 +53,11 @@ class ThatButton extends LitElement {
 
       .button:hover,
       .button:focus {
-        background: rgba(var(--primary), 0.122);
+        background: hsla(var(--primary), 0.122);
       }
 
       .button:active {
-        background: rgba(var(--primary), 0.243);
+        background: hsla(var(--primary), 0.243);
       }
 
       .button--shaped {
@@ -65,22 +65,22 @@ class ThatButton extends LitElement {
       }
 
       .button--outline {
-        color: rgb(var(--on-surface));
-        border: rgb(var(--primary)) 1pt solid;
+        color: hsl(var(--on-surface));
+        border: hsl(var(--primary)) 1pt solid;
       }
 
       .button--fill {
-        background: rgb(var(--primary));
-        color: rgb(var(--on-primary));
+        background: hsl(var(--primary));
+        color: hsl(var(--on-primary));
       }
 
       .button--fill:hover,
       .button--fill:focus {
-        background: rgba(var(--primary), 0.878);
+        background: hsla(var(--primary), 0.878);
       }
 
       .button--fill:active {
-        background: rgb(var(--primary-variant));
+        background: hsl(var(--primary-variant));
       }
 
       .button--elevate {
@@ -142,7 +142,7 @@ class ThatButton extends LitElement {
                     `}
               </div>
             `
-          : ''}
+          : undefined}
         <span class=${classMap({ text: true })}><slot></slot></span>
       </div>
     `

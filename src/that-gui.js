@@ -1,31 +1,34 @@
 import './components'
+import { componentFactory } from './component-factory'
 
 export class ThatGui {
-  constructor(options) {
+  constructor(options = { width: 500, parent: '', theme: {}, componentFactory: {} }) {
     this.container = document.createElement('that-gui')
     if (options.parent) {
       this.container.hasParent = true
       document.getElementById(options.parent).append(this.container)
     } else {
       document.body.append(this.container)
+      this.container.width = options.width
+    }
+    this.componentFactory = { ...componentFactory, ...options.componentFactory }
+    this.theme = {
+      primary: '265deg, 100%, 47%',
+      primaryVariant: '258deg, 100%, 35%',
+      secondary: '174deg, 97%, 43%',
+      secondaryVariant: '180deg, 99%, 27%',
+      background: '0deg, 0%, 100%',
+      surface: '0deg, 0%, 100%',
+      error: '349deg, 100%, 35%',
+      onPrimary: '0deg, 0%, 100%',
+      onSecondary: '0deg, 0%, 0%',
+      onBackground: '0deg, 0%, 0%',
+      onSurface: '0deg, 0%, 0%',
+      onError: '0deg, 0%, 100%',
+      ...options.theme,
     }
     this.controllerElements = {}
     this.objects = {}
-    this.theme = {
-      primary: '98, 0, 238',
-      primaryVariant: '55, 0, 179',
-      secondary: '3, 218, 198',
-      secondaryVariant: '1, 135, 134',
-      background: '255, 255, 255',
-      surface: '255, 255, 255',
-      error: '176, 0, 32',
-      onPrimary: '255, 255, 255',
-      onSecondary: '0, 0, 0',
-      onBackground: '0, 0, 0',
-      onSurface: '0, 0, 0',
-      onError: '255, 255, 255',
-      ...options.theme,
-    }
   }
 
   updateAllControllers() {
@@ -34,6 +37,7 @@ export class ThatGui {
 
   add(objects) {
     for (const key in objects) {
+      if (key.startsWith('_')) continue
       this.objects[key] = objects[key]
       this.addController(key, objects)
     }
@@ -49,10 +53,10 @@ export class ThatGui {
     controllerElement.gui = this
 
     if (pathKey != undefined) {
-      if (this.controllerElements[pathKey]) this.controllerElements[pathKey].appendChild(controllerElement)
+      if (this.controllerElements[pathKey]) this.controllerElements[pathKey].append(controllerElement)
       pathKey = `${pathKey}.${key}`
     } else {
-      this.container.appendChild(controllerElement)
+      this.container.append(controllerElement)
       pathKey = key
     }
 
@@ -64,19 +68,23 @@ export class ThatGui {
       ...parentObject[`_${key}`],
       object: parentObject,
       path: pathKey,
-      key: key
+      key: key,
     }
 
     if (typeof object == 'object') {
       let type = 'object'
       if (properties.type == undefined) {
         if (Array.isArray(object)) {
-          type = typeof object[0]
-          for (const item of object) {
-            if (type != typeof item) {
-              type = 'object'
-              break
+          if (object.length > 0) {
+            type = typeof object[0]
+            for (const item of object) {
+              if (type != typeof item) {
+                type = 'object'
+                break
+              }
             }
+          } else {
+            type = 'object'
           }
         }
       } else {
@@ -84,56 +92,83 @@ export class ThatGui {
       }
 
       if (type == 'object') {
+        properties.hasChildren = true
+        
         for (const childKey in object) this.addController(childKey, object, pathKey)
 
         if (object['__value'] != undefined) {
           properties.value = object['__value']
         }
-      } else if (type == 'tabswitch') {
-        const keys = Object.keys(object)
+      } else if (properties.switch) {
+        const keys = Object.keys(object).filter(key => key.charAt(0) != '_')
         properties.options = keys
         properties.value = keys[0]
 
         for (const childKey in object) {
+          if (childKey.startsWith('_')) continue
           const childObject = object[childKey]
           for (const grandChildKey in childObject) {
             const elem = this.addController(grandChildKey, childObject, `${pathKey}.${childKey}`)
-            if (elem) {
-              controllerElement.append(elem)
-              elem.slot = childKey
-            }
+            if (elem) controllerElement.appendChild(elem).slot = childKey
           }
         }
+
+        if (object['__value'] != undefined) {
+          properties.value = object['__value']
+        }
       } else if (type == 'color') {
-        properties.value = {...object}
+        properties.value = { ...object }
       } else {
         properties.value = [...object]
-        if (!properties.type) properties.type = `${type}Array`
+        if (!properties.type) properties.type = type
       }
     } else {
       properties.value = object
     }
 
-    if (!properties.type) properties.type = properties.value != undefined ? typeof properties.value : 'title'
-    
+    if (!properties.type)
+      properties.type =
+        properties.value == undefined
+          ? 'title'
+          : String(properties.value).charAt(0) == '#'
+          ? 'color'
+          : typeof properties.value
+
     for (const prop in properties) controllerElement[prop] = properties[prop]
+
+    controllerElement.component = this.componentFactory[properties.type.split(' ')[0]](properties, controllerElement)
 
     return controllerElement
   }
 
-  refreshControllers(startPointKey) {
-    if (startPointKey.length > 0) {
+  remove(startPointPath) {
+    const pathArray = startPointPath.split('.')
+    for (const key in this.controllerElements) {
+      const keyArray = key.split('.')
+      if (pathArray.every(i => keyArray.includes(i))) {
+        Array.isArray(this.controllerElements[key].component)
+          ? this.controllerElements[key].component.forEach(elem => elem.remove())
+          : this.controllerElements[key].component.remove()
+        delete this.controllerElements[key].component
+        this.controllerElements[key].remove()
+        delete this.controllerElements[key]
+      }
+    }
+  }
+
+  clear() {
+    Object.keys(this.objects).forEach(key => this.remove(key))
+  }
+
+  // TODO: refresh doesn't work with tabs...
+  refresh(startPointKey = '') {
+    if (startPointKey) {
       const topControllerIndex = Array.prototype.indexOf.call(
-        this.controllerElements[startPointKey].parentNode.children,
+        this.controllerElements[startPointKey].parentElement.children,
         this.controllerElements[startPointKey],
       )
 
-      for (const key in this.controllerElements) {
-        if (key.includes(startPointKey)) {
-          this.controllerElements[key].remove()
-          delete this.controllerElements[key]
-        }
-      }
+      this.remove(startPointKey)
 
       const path = startPointKey.split('.')
       const key = path.pop()
@@ -152,6 +187,8 @@ export class ThatGui {
 
       this.addController(key, controllersObject, pathKey)
       parentNode.insertBefore(parentNode.lastChild, parentNode.children[topControllerIndex])
+    } else {
+      Object.keys(this.objects).forEach(key => this.refresh(key))
     }
   }
 }

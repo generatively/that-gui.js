@@ -29,7 +29,7 @@ class ThatInput extends LitElement {
 
   set value(value) {
     const oldValue = this.__value
-    this.__value = (this.type == 'number') ? Math.ceil(parseFloat(value) / this.step) * this.step : value
+    this.__value = (this.type == 'number') ? parseFloat(value) : value
     this.requestUpdate('value', oldValue)
   }
 
@@ -40,9 +40,8 @@ class ThatInput extends LitElement {
         font-size: 1em;
         width: 17.5em;
         height: 3.5em;
-        margin: 0.125em 0.3em;
-        --primary: 98, 0, 238;
-        --on-surface: 0, 0, 0;
+        --primary: 265deg, 100%, 47%;
+        --on-surface: 0deg, 0%, 0%;
       }
 
       .text-field {
@@ -50,18 +49,18 @@ class ThatInput extends LitElement {
         box-sizing: border-box;
         height: 100%;
         border-radius: 0.25em 0.25em 0 0;
-        border-bottom: 0.0625em solid rgba(var(--on-surface), 0.6);
-        background: rgba(var(--on-surface), 0.039);
+        border-bottom: 0.0625em solid hsla(var(--on-surface), 0.6);
+        background: hsla(var(--on-surface), 0.039);
         transition: border 0.2s, background-color 0.2s;
       }
 
       .text-field:hover {
-        background: rgba(var(--on-surface), 0.063);
+        background: hsla(var(--on-surface), 0.063);
       }
 
       .text-field:focus-within {
-        background: rgba(var(--on-surface), 0.102);
-        border-bottom: 0.125em solid rgba(var(--primary), 0.6);
+        background: hsla(var(--on-surface), 0.102);
+        border-bottom: 0.125em solid hsla(var(--primary), 0.6);
       }
 
       .text-field__input {
@@ -71,7 +70,7 @@ class ThatInput extends LitElement {
         width: calc(100% - 1.08em);
         height: calc(100% - 1.25em);
         font-size: inherit;
-        color: rgba(var(--on-surface), 0.871);
+        color: hsla(var(--on-surface), 0.871);
         border: none;
         background: none;
       }
@@ -86,12 +85,12 @@ class ThatInput extends LitElement {
         top: 50%;
         left: 0.75em;
         transform: translateY(-50%);
-        color: rgba(var(--on-surface), 0.6);
+        color: hsla(var(--on-surface), 0.6);
         transition: top 0.2s, transform 0.2s, font-size 0.2s, color 0.2s;
       }
 
       .text-field__input:focus + .text-field__label {
-        color: rgba(var(--primary));
+        color: hsla(var(--primary));
       }
 
       .text-field__input:focus + .text-field__label,
@@ -111,11 +110,10 @@ class ThatInput extends LitElement {
           .value=${this.value}
           @change=${event => {
             this.value = event.target.value
-            this.dispatchEvent(new Event('change'))
           }}
           class=${classMap({ 'text-field__input': true })}
         />
-        <label class=${classMap({ 'text-field__label': true, 'text-field__label--float': this.value != '' })}
+        <label class=${classMap({ 'text-field__label': true, 'text-field__label--float': this.value !== '' })}
           >${this.label}</label
         >
       </div>
@@ -124,13 +122,13 @@ class ThatInput extends LitElement {
   }
 
   firstUpdated(changedProperties) {
-    if (changedProperties.has('value')) this.type = typeof this.value
-    
-    if (this.type == 'number') {
-      this.min = 0
-      this.max = this.value > 1 ? Math.pow(10, this.initialValue.toString().length) : 1
-      this.step = this.value > 1 ? 1 : 0.001
+    if (changedProperties.has('value')) {
+      this.type = typeof this.value
     }
+  }
+
+  updated(changedProperties) {
+    if (changedProperties.has('value')) this.dispatchEvent(new Event('change'))
   }
 }
 
