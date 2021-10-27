@@ -68,10 +68,10 @@ class ThatGuiComponent extends LitElement {
         width: 1.5em;
         height: 3em;
         border-radius: 1.5em 0 0 1.5em;
-        transform: translateY( -50%);
+        transform: translateY(-50%);
         transform-origin: center right;
         background: white;
-        box-shadow: -2.5px 0 4px -2px hsla(0deg, 0%, 0%, 0.4);
+        box-shadow: -3px 0 4px -3px hsla(0deg, 0%, 0%, 0.4);
         cursor: pointer;
         transition: width 0.2s, right 0.5s;
       }
@@ -88,14 +88,14 @@ class ThatGuiComponent extends LitElement {
       <div
         id="container"
         class=${classMap({ container: true, 'container--has-parent': this.hasParent })}
-        style=${styleMap({ width: `${this.width / 16}em`, right: this.minimised ? `-${this.width}px` : '' })}
+        style=${styleMap({ width: `${this.width / 16}em`, right: this.minimised ? `-${this.width / 16}em` : '' })}
       >
         ${this.hasParent
           ? undefined
           : html`
               <div
                 class=${classMap({ 'minimise-button': true, 'minimise-button--minimised': this.minimised })}
-                style=${styleMap({ right: this.minimised ? '' : `${this.width}px` })}
+                style=${styleMap({ right: this.minimised ? '' : `${this.width / 16}em` })}
                 @click=${() => {
                   this.minimised = !this.minimised
                   this.dispatchEvent(new Event('minimisetoggled', { detail: { minimised: this.minimised } }))

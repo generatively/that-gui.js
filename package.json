@@ -1,6 +1,6 @@
 {
   "name": "that-gui",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A simple GUI for manipulating JavaScript objects.",
   "main": "./src/that-gui.js",
   "files": [
