@@ -161,7 +161,7 @@ export class ThatGui {
   }
 
   // TODO: refresh doesn't work with tabs...
-  refresh(startPointKey = '') {
+  reload(startPointKey = '') {
     if (startPointKey) {
       const topControllerIndex = Array.prototype.indexOf.call(
         this.controllerElements[startPointKey].parentElement.children,
@@ -188,7 +188,7 @@ export class ThatGui {
       this.addController(key, controllersObject, pathKey)
       parentNode.insertBefore(parentNode.lastChild, parentNode.children[topControllerIndex])
     } else {
-      Object.keys(this.objects).forEach(key => this.refresh(key))
+      Object.keys(this.objects).forEach(key => this.reload(key))
     }
   }
 }
