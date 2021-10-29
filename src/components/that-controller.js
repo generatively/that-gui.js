@@ -367,6 +367,10 @@ class ThatController extends LitElement {
     })
   }
 
+  refresh() {
+    if ('refresh' in this.actions) this.actions['refresh']()
+  }
+
   setActive(active) {
     const containerElem = this.shadowRoot.getElementById('controller')
     const activeLeftPosition = 1 - this.path.split('.').length
