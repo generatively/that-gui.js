@@ -38,6 +38,9 @@ const componentFactory = {
         elem.maxValue = Math.random() * (elem.max + Math.abs(elem.min)) + elem.min
         elem.dispatchEvent(new Event('change'))
       },
+      refresh: () => {
+        elem.maxValue = properties.object[properties.key]
+      },
       ...controllerElement.actions,
     }
 
@@ -72,6 +75,10 @@ const componentFactory = {
         elem.maxValue = Math.random() * (elem.max + Math.abs(elem.min)) + elem.min
         elem.dispatchEvent(new Event('change'))
       },
+      refresh: () => {
+        elem.minValue = properties.object[properties.key][0]
+        elem.maxValue = properties.object[properties.key][1]
+      },
       ...controllerElement.actions,
     }
 
@@ -89,7 +96,13 @@ const componentFactory = {
     })
     elem.style.width = '100%'
 
-    controllerElement.actions = { reset: () => (elem.value = properties.value), ...controllerElement.actions }
+    controllerElement.actions = { 
+      reset: () => (elem.value = properties.value), 
+      refresh: () => {
+        elem.value = properties.object[properties.key]
+      },
+      ...controllerElement.actions 
+    }
     if (typeof properties.value == 'number' && !controllerElement.actions.randomise)
       controllerElement.actions.randomise = () => {
         elem.value = Math.ceil(Math.random() * 1000000000000000)
@@ -113,7 +126,13 @@ const componentFactory = {
 
     labelElem.innerText = properties.label
 
-    controllerElement.actions = { reset: () => (elem.value = properties.value), ...controllerElement.actions }
+    controllerElement.actions = { 
+      reset: () => (elem.value = properties.value),
+      refresh: () => {
+        elem.value = properties.object[properties.key]
+      }, 
+      ...controllerElement.actions,
+    }
 
     return [labelElem, elem]
   },
@@ -137,6 +156,9 @@ const componentFactory = {
     controllerElement.actions = {
       reset: () => (elem.value = properties.value),
       randomise: () => (elem.value = Math.random() < 0.5),
+      refresh: () => {
+        elem.value = properties.object[properties.key]
+      },
       ...controllerElement.actions,
     }
 
@@ -163,6 +185,9 @@ const componentFactory = {
     controllerElement.actions = {
       reset: () => (elem.value = properties.value),
       randomise: () => (elem.value = elem.options[Math.floor(Math.random() * elem.options.length)]),
+      refresh: () => {
+        elem.value = properties.object[properties.key]
+      },
       ...controllerElement.actions,
     }
 
@@ -186,6 +211,9 @@ const componentFactory = {
         reset: () => (elem.value = properties.value),
         randomise: () => (elem.value = elem.options[Math.floor(Math.random() * elem.options.length)]),
         ...controllerElement.actions,
+        refresh: () => {
+          elem.value = properties.object[properties.key]
+        },
       }
     }
 
@@ -210,6 +238,9 @@ const componentFactory = {
         elem.s = Math.random()
         elem.l = Math.random()
         elem.a = elem.noAlpha ? 1 : Math.round(Math.random() * 1000) / 1000
+      },
+      refresh: () => {
+        elem.value = properties.object[properties.key]
       },
       ...controllerElement.actions,
     }
