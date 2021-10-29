@@ -198,6 +198,9 @@ const componentFactory = {
     elem.label = properties.label
     elem.addEventListener('change', (event) => {
       properties.object[properties.key] = event.target.value
+      const privateKey = `_${properties.key}`
+      if (!(privateKey in properties.object)) properties.object[privateKey] = {}
+      properties.object[privateKey]['options'] = event.target.swatches
     })
 
     controllerElement.actions = {

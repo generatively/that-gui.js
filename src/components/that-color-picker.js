@@ -665,7 +665,7 @@ class ThatColorPicker extends LitElement {
   }
 
   updated(changedProperties) {
-    if (['h', 's', 'l', 'a'].some(i => changedProperties.has(i))) {
+    if (['h', 's', 'l', 'a', 'swatches'].some(i => changedProperties.has(i))) {
       this.dispatchEvent(new Event('change'))
     }
   }
