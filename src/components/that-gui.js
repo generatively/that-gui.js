@@ -6,14 +6,23 @@ class ThatGuiComponent extends LitElement {
   constructor() {
     super()
     this.hasParent = false
-    this.minimised = false
+    this.__minimised = false
     this.width = 500
+  }
+
+  get minimised() {
+    return this.__minimised
+  }
+
+  set minimised(value) {
+    this.__minimised = value
+    this.dispatchEvent(new Event('minimisetoggled', { detail: { minimised: this.minimised } }))
   }
 
   static get properties() {
     return {
       hasParent: { type: Boolean },
-      minimised: { type: Boolean },
+      __minimised: { type: Boolean },
       width: { type: Number },
     }
   }
@@ -96,10 +105,7 @@ class ThatGuiComponent extends LitElement {
               <div
                 class=${classMap({ 'minimise-button': true, 'minimise-button--minimised': this.minimised })}
                 style=${styleMap({ right: this.minimised ? '' : `${this.width / 16}em` })}
-                @click=${() => {
-                  this.minimised = !this.minimised
-                  this.dispatchEvent(new Event('minimisetoggled', { detail: { minimised: this.minimised } }))
-                }}
+                @click=${() => (this.minimised = !this.minimised)}
               ></div>
             `}
         <slot></slot>
