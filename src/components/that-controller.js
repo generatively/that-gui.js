@@ -60,16 +60,16 @@ class ThatController extends LitElement {
       }
 
       .controller:not(.controller--open).controller--has-children:hover {
-        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+        box-shadow: 0 1px 1px 0 hsla(var(--on-surface), 0.14), 0 2px 1px -1px hsla(var(--on-surface), 0.12), 0 1px 3px 0 hsla(var(--on-surface), 0.2);
       }
 
       .controller--open {
-        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+        box-shadow: 0 1px 1px 0 hsla(var(--on-surface), 0.14), 0 2px 1px -1px hsla(var(--on-surface), 0.12), 0 1px 3px 0 hsla(var(--on-surface), 0.2);
       }
 
       .controller--active {
-        box-shadow: 0 12px 17px 2px rgba(0, 0, 0, 0.14), 0 5px 22px 4px rgba(0, 0, 0, 0.12),
-          0 7px 8px -4px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 12px 17px 2px hsla(var(--on-surface), 0.14), 0 5px 22px 4px hsla(var(--on-surface), 0.12),
+          0 7px 8px -4px hsla(var(--on-surface), 0.2);
         z-index: 1;
       }
 
@@ -190,7 +190,7 @@ class ThatController extends LitElement {
         padding: 0.5em 0;
         border-radius: 0.25em;
         background: hsl(var(--surface));
-        box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 4px 5px 0 hsla(var(--on-surface), 0.14), 0 1px 10px 0 hsla(var(--on-surface), 0.12), 0 2px 4px -1px hsla(var(--on-surface), 0.2);
         z-index: 1;
       }
 
