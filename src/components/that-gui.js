@@ -80,7 +80,7 @@ class ThatGuiComponent extends LitElement {
         border-radius: 1.5em 0 0 1.5em;
         transform: translateY(-50%);
         transform-origin: center right;
-        background: white;
+        background: inherit;
         box-shadow: -3px 0 4px -3px hsla(0deg, 0%, 0%, 0.4);
         cursor: pointer;
         transition: width 0.2s, right 0.5s;
