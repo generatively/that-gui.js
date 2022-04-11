@@ -31,6 +31,7 @@ class ThatGuiComponent extends LitElement {
     return css`
       :host {
         font-family: Helvetica, Arial, sans-serif;
+        background: white;
       }
 
       .container {
@@ -44,7 +45,7 @@ class ThatGuiComponent extends LitElement {
         height: 100vh;
         box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
         padding: 20px;
-        background: white;
+        background: inherit;
         transition: right 0.5s;
       }
 
